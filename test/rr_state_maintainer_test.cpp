@@ -132,31 +132,30 @@ TEST_F(TestController, range)
   state_maintainer_->set_range(req_sh, res_sh);
 
   EXPECT_TRUE(res_sh->buffer_response.feature_sets.has_ranges);
-  // EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_LEFT,
-  //           state_maintainer_->get_ranges()[1].header.frame_id);
-  // EXPECT_EQ(state_maintainer_->get_ranges()[1].header.stamp, current_time);
-  // EXPECT_EQ(state_maintainer_->get_ranges()[1].min_range, expected2.min_range);
-  // EXPECT_EQ(state_maintainer_->get_ranges()[1].max_range, expected2.max_range);
-  // EXPECT_EQ(state_maintainer_->get_ranges()[1].radiation_type, expected2.radiation_type);
-  // EXPECT_EQ(state_maintainer_->get_ranges()[1].range, expected2.range);
+  EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_LEFT, res_sh->buffer_response.ranges[1].header.frame_id);
+  EXPECT_EQ(res_sh->buffer_response.ranges[1].header.stamp, current_time);
+  EXPECT_EQ(res_sh->buffer_response.ranges[1].min_range, expected2.min_range);
+  EXPECT_EQ(res_sh->buffer_response.ranges[1].max_range, expected2.max_range);
+  EXPECT_EQ(res_sh->buffer_response.ranges[1].radiation_type, expected2.radiation_type);
+  EXPECT_EQ(res_sh->buffer_response.ranges[1].range, expected2.range);
 
-//   // override center
-//   current_time = clock.now();
-//   sensor_msgs::msg::Range expected3;
-//   expected3.header.frame_id = rr_constants::LINK_ULTRA_SONIC_CENTER;
-//   expected3.header.stamp    = current_time;
+  // override center
+  current_time = clock.now();
+  sensor_msgs::msg::Range expected3;
+  expected3.header.frame_id = rr_constants::LINK_ULTRA_SONIC_CENTER;
+  expected3.header.stamp    = current_time;
 
-//   // reference: https://wiki.dfrobot.com/URM09_Ultrasonic_Sensor_(Gravity-I2C)_(V1.0)_SKU_SEN0304
-//   expected3.min_range      = 2;
-//   expected3.max_range      = 500;
-//   expected3.radiation_type = sensor_msgs::msg::Range::ULTRASOUND;
-//   expected3.range          = 50;
-//   state_maintainer_->set_range(expected3);
+  // reference: https://wiki.dfrobot.com/URM09_Ultrasonic_Sensor_(Gravity-I2C)_(V1.0)_SKU_SEN0304
+  expected3.min_range      = 2;
+  expected3.max_range      = 500;
+  expected3.radiation_type = sensor_msgs::msg::Range::ULTRASOUND;
+  expected3.range          = 50;
+  req_sh->range = expected3;
+  state_maintainer_->set_range(req_sh, res_sh);
 
-//   EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_CENTER,
-//             state_maintainer_->get_ranges()[0].header.frame_id);
-//   EXPECT_EQ(state_maintainer_->get_ranges()[0].header.stamp, current_time);
-//   EXPECT_EQ(state_maintainer_->get_ranges()[0].range, expected3.range);
+  EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_CENTER, res_sh->buffer_response.ranges[0].header.frame_id);
+  EXPECT_EQ(res_sh->buffer_response.ranges[0].header.stamp, current_time);
+  EXPECT_EQ(res_sh->buffer_response.ranges[0].range, expected3.range);
 }
 
 int main(int argc, char** argv)

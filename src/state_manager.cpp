@@ -33,6 +33,7 @@ void RrStateManagerSrv::set_range(
     if (buffer_response_.ranges.at(i).header.frame_id == range.header.frame_id)
     {
       buffer_response_.ranges[i] = range;
+      response->buffer_response  = buffer_response_;
       return;
     }
   }
