@@ -14,7 +14,6 @@ void RrStateManagerSrv::set_gps(
   response->buffer_response = buffer_response_;
 }
 
-
 void RrStateManagerSrv::set_range(
     const std::shared_ptr<rr_interfaces::srv::StateRange::Request> request,
     std::shared_ptr<rr_interfaces::srv::StateRange::Response> response)
@@ -40,7 +39,7 @@ void RrStateManagerSrv::set_range(
 
   buffer_response_.ranges.resize(buffer_response_.ranges.size() + 1);
   buffer_response_.ranges[buffer_response_.ranges.size() - 1] = range;
-  response->buffer_response = buffer_response_;
+  response->buffer_response                                   = buffer_response_;
 }
 
 /*
