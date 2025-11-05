@@ -10,10 +10,8 @@
 #include "rr_interfaces/srv/state_image.hpp"
 #include "rr_interfaces/srv/state_imu.hpp"
 #include "rr_interfaces/srv/state_joy_req.hpp"
-#include "rr_interfaces/srv/state_left_front_range.hpp"
-#include "rr_interfaces/srv/state_middle_front_range.hpp"
+#include "rr_interfaces/srv/state_range.hpp"
 #include "rr_interfaces/srv/state_response.hpp"
-#include "rr_interfaces/srv/state_right_front_range.hpp"
 
 namespace rr_state_manager
 {
@@ -67,17 +65,10 @@ class RrStateManagerSrv : public rclcpp::Node
   void set_imu(const std::shared_ptr<rr_interfaces::srv::StateImu::Request> request,
                std::shared_ptr<rr_interfaces::srv::StateImu::Response> response);
 
-  void set_left_front_range(
-      const std::shared_ptr<rr_interfaces::srv::StateLeftFrontRange::Request> request,
-      std::shared_ptr<rr_interfaces::srv::StateLeftFrontRange::Response> response);
+  void set_range(
+      const std::shared_ptr<rr_interfaces::srv::StateRange::Request> request,
+      std::shared_ptr<rr_interfaces::srv::StateRange::Response> response);
 
-  void set_middle_front_range(
-      const std::shared_ptr<rr_interfaces::srv::StateMiddleFrontRange::Request> request,
-      std::shared_ptr<rr_interfaces::srv::StateMiddleFrontRange::Response> response);
-
-  void set_right_front_range(
-      const std::shared_ptr<rr_interfaces::srv::StateRightFrontRange::Request> request,
-      std::shared_ptr<rr_interfaces::srv::StateRightFrontRange::Response> response);
   /**
    * @fn get_state
    * @brief returns current state
@@ -89,7 +80,6 @@ class RrStateManagerSrv : public rclcpp::Node
 
  private:
   void init();
-  void set_range(const sensor_msgs::msg::Range range);
   const std::array<std::string, 3> RANGES_LINKS_ = {rr_constants::LINK_ULTRA_SONIC_CENTER,
                                                     rr_constants::LINK_ULTRA_SONIC_LEFT,
                                                     rr_constants::LINK_ULTRA_SONIC_RIGHT};
