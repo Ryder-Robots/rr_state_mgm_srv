@@ -76,6 +76,88 @@ TEST_F(TestController, gps)
   GTEST_EXPECT_TRUE(res_sh->buffer_response.feature_sets.has_gps);
 }
 
+TEST_F(TestController, range)
+{
+  rclcpp::Clock clock;
+  auto current_time = clock.now();
+  sensor_msgs::msg::Range expected1;
+  expected1.header.frame_id = rr_constants::LINK_ULTRA_SONIC_CENTER;
+  expected1.header.stamp    = current_time;
+
+  // reference: https://wiki.dfrobot.com/URM09_Ultrasonic_Sensor_(Gravity-I2C)_(V1.0)_SKU_SEN0304
+  expected1.min_range      = 2;
+  expected1.max_range      = 500;
+  expected1.radiation_type = sensor_msgs::msg::Range::ULTRASOUND;
+  expected1.range          = 80;
+
+  // this value can be calculated as FoV = 2 x arctan(beam radius / distance from sensor), URM09 the
+  // beam radius is 60 degrees
+  expected1.field_of_view = 2 * atan(2 * (60 / expected1.range));
+  rr_interfaces::srv::StateLeftFrontRange::Request request;
+  rr_interfaces::srv::StateLeftFrontRange::Response response;
+  request.range = expected1;
+  std::shared_ptr<rr_interfaces::srv::StateLeftFrontRange::Request> req_sh =
+      std::make_shared<rr_interfaces::srv::StateLeftFrontRange::Request>(request);
+  std::shared_ptr<rr_interfaces::srv::StateLeftFrontRange::Response> res_sh =
+      std::make_shared<rr_interfaces::srv::StateLeftFrontRange::Response>(response);
+
+  state_maintainer_->set_left_front_range(req_sh, res_sh);
+  std::vector<sensor_msgs::msg::Range> ranges = res_sh->buffer_response.ranges;
+
+  // Note because only one range has been placed in this, we only use the one. However for a real application 
+  // the link code will need to be checked to see which range was added.
+  EXPECT_TRUE(res_sh->buffer_response.feature_sets.has_ranges);
+  EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_CENTER, ranges[0].header.frame_id);
+  EXPECT_EQ(ranges[0].header.stamp, current_time);
+  EXPECT_EQ(ranges[0].min_range, expected1.min_range);
+  EXPECT_EQ(ranges[0].max_range, expected1.max_range);
+  EXPECT_EQ(ranges[0].radiation_type, expected1.radiation_type);
+  EXPECT_EQ(ranges[0].range, expected1.range);
+
+//   // Added a new range sensor.
+//   sensor_msgs::msg::Range expected2;
+//   expected2.header.frame_id = rr_constants::LINK_ULTRA_SONIC_LEFT;
+//   expected2.header.stamp    = current_time;
+
+//   // reference: https://wiki.dfrobot.com/URM09_Ultrasonic_Sensor_(Gravity-I2C)_(V1.0)_SKU_SEN0304
+//   expected2.min_range      = 2;
+//   expected2.max_range      = 500;
+//   expected2.radiation_type = sensor_msgs::msg::Range::ULTRASOUND;
+//   expected2.range          = 40;
+
+//   // this value can be calculated as FoV = 2 x arctan(beam radius / distance from sensor), URM09 the
+//   // beam radius is 60 degrees
+//   expected2.field_of_view = 2 * atan(2 * (60 / expected2.range));
+//   state_maintainer_->set_range(expected2);
+
+//   EXPECT_TRUE(state_maintainer_->get_feature_set().has_ranges);
+//   EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_LEFT,
+//             state_maintainer_->get_ranges()[1].header.frame_id);
+//   EXPECT_EQ(state_maintainer_->get_ranges()[1].header.stamp, current_time);
+//   EXPECT_EQ(state_maintainer_->get_ranges()[1].min_range, expected2.min_range);
+//   EXPECT_EQ(state_maintainer_->get_ranges()[1].max_range, expected2.max_range);
+//   EXPECT_EQ(state_maintainer_->get_ranges()[1].radiation_type, expected2.radiation_type);
+//   EXPECT_EQ(state_maintainer_->get_ranges()[1].range, expected2.range);
+
+//   // override center
+//   current_time = clock.now();
+//   sensor_msgs::msg::Range expected3;
+//   expected3.header.frame_id = rr_constants::LINK_ULTRA_SONIC_CENTER;
+//   expected3.header.stamp    = current_time;
+
+//   // reference: https://wiki.dfrobot.com/URM09_Ultrasonic_Sensor_(Gravity-I2C)_(V1.0)_SKU_SEN0304
+//   expected3.min_range      = 2;
+//   expected3.max_range      = 500;
+//   expected3.radiation_type = sensor_msgs::msg::Range::ULTRASOUND;
+//   expected3.range          = 50;
+//   state_maintainer_->set_range(expected3);
+
+//   EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_CENTER,
+//             state_maintainer_->get_ranges()[0].header.frame_id);
+//   EXPECT_EQ(state_maintainer_->get_ranges()[0].header.stamp, current_time);
+//   EXPECT_EQ(state_maintainer_->get_ranges()[0].range, expected3.range);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

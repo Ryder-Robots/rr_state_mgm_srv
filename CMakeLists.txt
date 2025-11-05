@@ -9,12 +9,13 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rr_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rr_common_base REQUIRED)
 
 add_library(${PROJECT_NAME}_lib
   src/state_manager.cpp
 )
 
-ament_target_dependencies(${PROJECT_NAME}_lib rclcpp rr_interfaces)
+ament_target_dependencies(${PROJECT_NAME}_lib rclcpp rr_interfaces "rr_common_base")
 
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

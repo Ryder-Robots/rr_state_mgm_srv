@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
+#include "rr_common_base/rr_constants.hpp"
 #include "rr_interfaces/srv/state_batt_req.hpp"
 #include "rr_interfaces/srv/state_gps_req.hpp"
 #include "rr_interfaces/srv/state_image.hpp"
@@ -66,6 +67,17 @@ class RrStateManagerSrv : public rclcpp::Node
   void set_imu(const std::shared_ptr<rr_interfaces::srv::StateImu::Request> request,
                std::shared_ptr<rr_interfaces::srv::StateImu::Response> response);
 
+  void set_left_front_range(
+      const std::shared_ptr<rr_interfaces::srv::StateLeftFrontRange::Request> request,
+      std::shared_ptr<rr_interfaces::srv::StateLeftFrontRange::Response> response);
+
+  void set_middle_front_range(
+      const std::shared_ptr<rr_interfaces::srv::StateMiddleFrontRange::Request> request,
+      std::shared_ptr<rr_interfaces::srv::StateMiddleFrontRange::Response> response);
+
+  void set_right_front_range(
+      const std::shared_ptr<rr_interfaces::srv::StateRightFrontRange::Request> request,
+      std::shared_ptr<rr_interfaces::srv::StateRightFrontRange::Response> response);
   /**
    * @fn get_state
    * @brief returns current state
@@ -77,9 +89,13 @@ class RrStateManagerSrv : public rclcpp::Node
 
  private:
   void init();
+  void set_range(const sensor_msgs::msg::Range range);
+  const std::array<std::string, 3> RANGES_LINKS_ = {rr_constants::LINK_ULTRA_SONIC_CENTER,
+                                                    rr_constants::LINK_ULTRA_SONIC_LEFT,
+                                                    rr_constants::LINK_ULTRA_SONIC_RIGHT};
+
   rclcpp::Logger logger_ = rclcpp::get_logger("state_maintainer");
   std::shared_mutex mutex_;
-
   rr_interfaces::msg::BufferResponse buffer_response_;
 };
 
