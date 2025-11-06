@@ -5,6 +5,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rr_common_base/rr_constants.hpp"
+#include "rr_common_base/rr_state_mng_constants.hpp"
 #include "rr_interfaces/srv/state_batt_req.hpp"
 #include "rr_interfaces/srv/state_gps_req.hpp"
 #include "rr_interfaces/srv/state_image.hpp"
@@ -49,7 +50,7 @@ class RrStateManagerSrv : public rclcpp::Node
   /**
    * @fn set_batt_state
    * @brief
-   * sets Battery state within the state manager.
+   * sets battery state
    */
   void set_batt_state(const std::shared_ptr<rr_interfaces::srv::StateBattReq::Request> request,
                       std::shared_ptr<rr_interfaces::srv::StateBattReq::Response> response);
@@ -65,9 +66,8 @@ class RrStateManagerSrv : public rclcpp::Node
   void set_imu(const std::shared_ptr<rr_interfaces::srv::StateImu::Request> request,
                std::shared_ptr<rr_interfaces::srv::StateImu::Response> response);
 
-  void set_range(
-      const std::shared_ptr<rr_interfaces::srv::StateRange::Request> request,
-      std::shared_ptr<rr_interfaces::srv::StateRange::Response> response);
+  void set_range(const std::shared_ptr<rr_interfaces::srv::StateRange::Request> request,
+                 std::shared_ptr<rr_interfaces::srv::StateRange::Response> response);
 
   /**
    * @fn get_state
@@ -77,6 +77,10 @@ class RrStateManagerSrv : public rclcpp::Node
                  std::shared_ptr<rr_interfaces::srv::StateResponse::Response> response);
 
   ~RrStateManagerSrv() = default;
+
+  // state variables
+  rclcpp::Service<rr_interfaces::srv::StateGpsReq>::SharedPtr state_gps_req_;
+  rclcpp::Service<rr_interfaces::srv::StateJoyReq>::SharedPtr state_joy_req_;  
 
  private:
   void init();
