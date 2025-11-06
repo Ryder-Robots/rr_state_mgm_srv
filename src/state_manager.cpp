@@ -95,7 +95,10 @@ void RrStateManagerSrv::get_state(
     const std::shared_ptr<rr_interfaces::srv::StateResponse::Request> request,
     std::shared_ptr<rr_interfaces::srv::StateResponse::Response> response)
 {
-  validator_.validate_uuid(request->buffer_request.request_id, true);
+  if (!validator_.validate_uuid(request->buffer_request.request_id, false)) 
+  {
+    RCLCPP_WARN(this->logger_, "request recieved that did not have a request id");
+  }
 
   std::shared_lock<std::shared_mutex> lock(mutex_);
   boost::uuids::uuid boost_uuid = boost::uuids::random_generator()();
@@ -105,7 +108,7 @@ void RrStateManagerSrv::get_state(
   buffer_response_.header.stamp = this->now();
   buffer_response_.header.frame_id = rr_constants::LINK_STATE;
   msg_snt_++;
-  RCLCPP_INFO(logger_, "sending current state sequence: %ld", msg_snt_);
+  RCLCPP_DEBUG(logger_, "sending current state sequence: %ld", msg_snt_);
   buffer_response_.seq = msg_snt_;
   response->buffer_response = buffer_response_;
 }
