@@ -117,6 +117,11 @@ void RrStateManagerSrv::init()
 
   RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_JOY_REQ.c_str());
   state_joy_req_ = this->create_service<rr_interfaces::srv::StateJoyReq>(
-      rr_constants_state_mgr::STATE_JOY_REQ, std::bind(&RrStateManagerSrv::set_joystick, this, _1, _2));
-      
+      rr_constants_state_mgr::STATE_JOY_REQ,
+      std::bind(&RrStateManagerSrv::set_joystick, this, _1, _2));
+
+  RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_BAT_REQ.c_str());
+  state_bat_req_ = this->create_service<rr_interfaces::srv::StateBattReq>(
+      rr_constants_state_mgr::STATE_BAT_REQ,
+      std::bind(&RrStateManagerSrv::set_batt_state, this, _1, _2));
 }

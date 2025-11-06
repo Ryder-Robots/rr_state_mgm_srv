@@ -80,7 +80,8 @@ class RrStateManagerSrv : public rclcpp::Node
 
   // state variables
   rclcpp::Service<rr_interfaces::srv::StateGpsReq>::SharedPtr state_gps_req_;
-  rclcpp::Service<rr_interfaces::srv::StateJoyReq>::SharedPtr state_joy_req_;  
+  rclcpp::Service<rr_interfaces::srv::StateJoyReq>::SharedPtr state_joy_req_;
+  rclcpp::Service<rr_interfaces::srv::StateBattReq>::SharedPtr state_bat_req_;  
 
  private:
   void init();
