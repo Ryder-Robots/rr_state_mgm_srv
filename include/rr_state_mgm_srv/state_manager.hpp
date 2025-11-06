@@ -81,10 +81,12 @@ class RrStateManagerSrv : public rclcpp::Node
   // state variables
   rclcpp::Service<rr_interfaces::srv::StateGpsReq>::SharedPtr state_gps_req_;
   rclcpp::Service<rr_interfaces::srv::StateJoyReq>::SharedPtr state_joy_req_;
-  rclcpp::Service<rr_interfaces::srv::StateBattReq>::SharedPtr state_bat_req_;  
+  rclcpp::Service<rr_interfaces::srv::StateBattReq>::SharedPtr state_bat_req_;
+  rclcpp::Service<rr_interfaces::srv::StateImage>::SharedPtr state_img_req_;
 
  private:
   void init();
+  void init_services();
   const std::array<std::string, 3> RANGES_LINKS_ = {rr_constants::LINK_ULTRA_SONIC_CENTER,
                                                     rr_constants::LINK_ULTRA_SONIC_LEFT,
                                                     rr_constants::LINK_ULTRA_SONIC_RIGHT};

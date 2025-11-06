@@ -93,6 +93,29 @@ void RrStateManagerSrv::get_state(
   response->buffer_response = buffer_response_;
 }
 
+void RrStateManagerSrv::init_services()
+{
+  RCLCPP_INFO(logger_, "creating services");
+  RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_GPS_REQ.c_str());
+  state_gps_req_ = this->create_service<rr_interfaces::srv::StateGpsReq>(
+      rr_constants_state_mgr::STATE_GPS_REQ, std::bind(&RrStateManagerSrv::set_gps, this, _1, _2));
+
+  RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_JOY_REQ.c_str());
+  state_joy_req_ = this->create_service<rr_interfaces::srv::StateJoyReq>(
+      rr_constants_state_mgr::STATE_JOY_REQ,
+      std::bind(&RrStateManagerSrv::set_joystick, this, _1, _2));
+
+  RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_BAT_REQ.c_str());
+  state_bat_req_ = this->create_service<rr_interfaces::srv::StateBattReq>(
+      rr_constants_state_mgr::STATE_BAT_REQ,
+      std::bind(&RrStateManagerSrv::set_batt_state, this, _1, _2));
+
+  RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_IMG_REQ.c_str());
+  state_img_req_ = this->create_service<rr_interfaces::srv::StateImage>(
+      rr_constants_state_mgr::STATE_IMG_REQ,
+      std::bind(&RrStateManagerSrv::set_image, this, _1, _2));
+}
+
 /*
  * During initalization set all features to 'false' assume that nothing is there until it is set
  * at least once.
@@ -110,18 +133,5 @@ void RrStateManagerSrv::init()
   // set range to 3. this is hard limit for now.
   buffer_response_.ranges.resize(0);
 
-  RCLCPP_INFO(logger_, "linking methods");
-  RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_GPS_REQ.c_str());
-  state_gps_req_ = this->create_service<rr_interfaces::srv::StateGpsReq>(
-      rr_constants_state_mgr::STATE_GPS_REQ, std::bind(&RrStateManagerSrv::set_gps, this, _1, _2));
-
-  RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_JOY_REQ.c_str());
-  state_joy_req_ = this->create_service<rr_interfaces::srv::StateJoyReq>(
-      rr_constants_state_mgr::STATE_JOY_REQ,
-      std::bind(&RrStateManagerSrv::set_joystick, this, _1, _2));
-
-  RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_BAT_REQ.c_str());
-  state_bat_req_ = this->create_service<rr_interfaces::srv::StateBattReq>(
-      rr_constants_state_mgr::STATE_BAT_REQ,
-      std::bind(&RrStateManagerSrv::set_batt_state, this, _1, _2));
+  init_services();
 }
