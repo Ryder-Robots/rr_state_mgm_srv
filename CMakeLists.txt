@@ -13,6 +13,7 @@ find_package(rr_common_base REQUIRED)
 
 add_library(${PROJECT_NAME}_lib
   src/state_manager.cpp
+  src/state_validator.cpp
 )
 
 ament_target_dependencies(${PROJECT_NAME}_lib rclcpp rr_interfaces "rr_common_base")
@@ -23,7 +24,8 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC
 )
 
 add_executable(${PROJECT_NAME}_node
-  src/main.cpp )
+  src/main.cpp 
+)
 
 target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME}_lib)  
 

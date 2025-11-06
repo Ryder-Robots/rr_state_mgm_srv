@@ -2,7 +2,8 @@
 #define STATE_MANAGER_HPP
 
 #include <memory>
-
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 #include "rclcpp/rclcpp.hpp"
 #include "rr_common_base/rr_constants.hpp"
 #include "rr_common_base/rr_state_mng_constants.hpp"
@@ -13,6 +14,7 @@
 #include "rr_interfaces/srv/state_joy_req.hpp"
 #include "rr_interfaces/srv/state_range.hpp"
 #include "rr_interfaces/srv/state_response.hpp"
+#include "state_validator.hpp"
 
 namespace rr_state_manager
 {
@@ -85,6 +87,7 @@ class RrStateManagerSrv : public rclcpp::Node
   rclcpp::Service<rr_interfaces::srv::StateImage>::SharedPtr state_img_req_;
 
  private:
+  long msg_snt_ = 0;
   void init();
   void init_services();
   const std::array<std::string, 3> RANGES_LINKS_ = {rr_constants::LINK_ULTRA_SONIC_CENTER,
@@ -94,6 +97,7 @@ class RrStateManagerSrv : public rclcpp::Node
   rclcpp::Logger logger_ = rclcpp::get_logger("state_maintainer");
   std::shared_mutex mutex_;
   rr_interfaces::msg::BufferResponse buffer_response_;
+  rr_state_validator::RrStateValidator validator_;
 };
 
 }  // namespace rr_state_manager
