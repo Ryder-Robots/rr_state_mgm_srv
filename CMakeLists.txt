@@ -12,7 +12,6 @@ find_package(rclcpp REQUIRED)
 find_package(rr_common_base REQUIRED)
 
 add_library(${PROJECT_NAME}_lib
-  src/rr_state_base.cpp
   src/rr_battery_state_service.cpp
   src/rr_gps_service.cpp
   src/state_manager.cpp
