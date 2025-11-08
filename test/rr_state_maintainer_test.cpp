@@ -34,45 +34,47 @@ class TestController : public testing::Test
 // Test setters and getters
 TEST_F(TestController, gps)
 {
-  // rclcpp::Clock clock;
-  // auto current_time = clock.now();
+  rclcpp::Clock clock;
+  auto current_time = clock.now();
 
-  // sensor_msgs::msg::NavSatFix expected;
-  // expected.header.stamp    = current_time;
-  // expected.header.frame_id = "gps_link";
-  // expected.status.status   = sensor_msgs::msg::NavSatStatus::STATUS_FIX;
-  // expected.status.service  = sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
+  sensor_msgs::msg::NavSatFix expected;
+  expected.header.stamp    = current_time;
+  expected.header.frame_id = "gps_link";
+  expected.status.status   = sensor_msgs::msg::NavSatStatus::STATUS_FIX;
+  expected.status.service  = sensor_msgs::msg::NavSatStatus::SERVICE_GPS;
 
-  // // Set geographic coordinates (latitude, longitude, altitude)
-  // expected.latitude  = -33.8688;  // Degrees, e.g., Sydney
-  // expected.longitude = 151.2093;  // Degrees, e.g., Sydney
-  // expected.altitude  = 58.0;      // In meters above WGS84 ellipsoid
+  // Set geographic coordinates (latitude, longitude, altitude)
+  expected.latitude  = -33.8688;  // Degrees, e.g., Sydney
+  expected.longitude = 151.2093;  // Degrees, e.g., Sydney
+  expected.altitude  = 58.0;      // In meters above WGS84 ellipsoid
 
-  // // Set position covariance (if known, otherwise leave as default zeros)
-  // std::fill(std::begin(expected.position_covariance), std::end(expected.position_covariance), 0.0);
-  // expected.position_covariance_type = sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
+  // Set position covariance (if known, otherwise leave as default zeros)
+  std::fill(std::begin(expected.position_covariance), std::end(expected.position_covariance), 0.0);
+  expected.position_covariance_type = sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
 
-  // rr_interfaces::srv::StateGpsReq::Request request;
-  // rr_interfaces::srv::StateGpsReq::Response response;
-  // request.gps = expected;
-  // std::shared_ptr<rr_interfaces::srv::StateGpsReq::Request> req_sh =
-  //     std::make_shared<rr_interfaces::srv::StateGpsReq::Request>(request);
-  // std::shared_ptr<rr_interfaces::srv::StateGpsReq::Response> res_sh =
-  //     std::make_shared<rr_interfaces::srv::StateGpsReq::Response>(response);
+  rr_interfaces::srv::Gps::Request request;
+  rr_interfaces::srv::Gps::Response response;
+  request.gps_tx = expected;
+  request.override_state = true;
+  std::shared_ptr<rr_interfaces::srv::Gps::Request> req_sh =
+      std::make_shared<rr_interfaces::srv::Gps::Request>(request);
+  std::shared_ptr<rr_interfaces::srv::Gps::Response> res_sh =
+      std::make_shared<rr_interfaces::srv::Gps::Response>(response);
 
-  // state_maintainer_->set_gps(req_sh, res_sh);
-  // sensor_msgs::msg::NavSatFix actual = res_sh->buffer_response.gps;
+  state_maintainer_->set_gps(req_sh, res_sh);
+  sensor_msgs::msg::NavSatFix actual = res_sh->gps_rx;
 
-  // EXPECT_EQ(actual.header.stamp, current_time);
-  // EXPECT_EQ(actual.header.frame_id, "gps_link");
-  // EXPECT_EQ(actual.status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
-  // EXPECT_EQ(actual.status.service, sensor_msgs::msg::NavSatStatus::SERVICE_GPS);
+  EXPECT_EQ(actual.header.stamp, current_time);
+  EXPECT_EQ(actual.header.frame_id, "gps_link");
+  EXPECT_EQ(actual.status.status, sensor_msgs::msg::NavSatStatus::STATUS_FIX);
+  EXPECT_EQ(actual.status.service, sensor_msgs::msg::NavSatStatus::SERVICE_GPS);
 
-  // // allow a tolerance of around 1 meter.
-  // EXPECT_NEAR(actual.latitude, -33.8688, 0.000009);
-  // EXPECT_NEAR(actual.longitude, 151.2093, 0.000009);
-  // EXPECT_NEAR(actual.altitude, 58.0, 1);
+  // allow a tolerance of around 1 meter.
+  EXPECT_NEAR(actual.latitude, -33.8688, 0.000009);
+  EXPECT_NEAR(actual.longitude, 151.2093, 0.000009);
+  EXPECT_NEAR(actual.altitude, 58.0, 1);
 
+  // state_maintainer_->get_state();
   // GTEST_EXPECT_TRUE(res_sh->buffer_response.feature_sets.has_gps);
 }
 
@@ -90,7 +92,8 @@ TEST_F(TestController, gps)
 //   expected1.radiation_type = sensor_msgs::msg::Range::ULTRASOUND;
 //   expected1.range          = 80;
 
-//   // this value can be calculated as FoV = 2 x arctan(beam radius / distance from sensor), URM09 the
+//   // this value can be calculated as FoV = 2 x arctan(beam radius / distance from sensor), URM09
+//   the
 //   // beam radius is 60 degrees
 //   expected1.field_of_view = 2 * atan(2 * (60 / expected1.range));
 //   rr_interfaces::srv::StateRange::Request request;
@@ -104,7 +107,8 @@ TEST_F(TestController, gps)
 //   state_maintainer_->set_range(req_sh, res_sh);
 //   std::vector<sensor_msgs::msg::Range> ranges = res_sh->buffer_response.ranges;
 
-//   // Note because only one range has been placed in this, we only use the one. However for a real application 
+//   // Note because only one range has been placed in this, we only use the one. However for a real
+//   application
 //   // the link code will need to be checked to see which range was added.
 //   EXPECT_TRUE(res_sh->buffer_response.feature_sets.has_ranges);
 //   EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_CENTER, ranges[0].header.frame_id);
@@ -125,14 +129,16 @@ TEST_F(TestController, gps)
 //   expected2.radiation_type = sensor_msgs::msg::Range::ULTRASOUND;
 //   expected2.range          = 40;
 
-//   // this value can be calculated as FoV = 2 x arctan(beam radius / distance from sensor), URM09 the
+//   // this value can be calculated as FoV = 2 x arctan(beam radius / distance from sensor), URM09
+//   the
 //   // beam radius is 60 degrees
-//   expected2.field_of_view = 2 * atan(2 * (60 / expected2.range));  
+//   expected2.field_of_view = 2 * atan(2 * (60 / expected2.range));
 //   req_sh->range = expected2;
 //   state_maintainer_->set_range(req_sh, res_sh);
 
 //   EXPECT_TRUE(res_sh->buffer_response.feature_sets.has_ranges);
-//   EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_LEFT, res_sh->buffer_response.ranges[1].header.frame_id);
+//   EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_LEFT,
+//   res_sh->buffer_response.ranges[1].header.frame_id);
 //   EXPECT_EQ(res_sh->buffer_response.ranges[1].header.stamp, current_time);
 //   EXPECT_EQ(res_sh->buffer_response.ranges[1].min_range, expected2.min_range);
 //   EXPECT_EQ(res_sh->buffer_response.ranges[1].max_range, expected2.max_range);
@@ -153,7 +159,8 @@ TEST_F(TestController, gps)
 //   req_sh->range = expected3;
 //   state_maintainer_->set_range(req_sh, res_sh);
 
-//   EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_CENTER, res_sh->buffer_response.ranges[0].header.frame_id);
+//   EXPECT_EQ(rr_constants::LINK_ULTRA_SONIC_CENTER,
+//   res_sh->buffer_response.ranges[0].header.frame_id);
 //   EXPECT_EQ(res_sh->buffer_response.ranges[0].header.stamp, current_time);
 //   EXPECT_EQ(res_sh->buffer_response.ranges[0].range, expected3.range);
 // }

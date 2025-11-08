@@ -5,9 +5,11 @@ using namespace rr_state_manager;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
+/**
+ *  common template that will control locking.
+ */
 template <typename T, typename R>
-void RrStateManagerSrv::set_state(const std::shared_ptr<T>& request,
-                                  std::shared_ptr<R>& response,
+void RrStateManagerSrv::set_state(const std::shared_ptr<T>& request, std::shared_ptr<R>& response,
                                   const std::function<void(const std::shared_ptr<T>&)>& cb1,
                                   const std::function<void(std::shared_ptr<R>&)>& cb2,
                                   const bool override_state)
@@ -22,6 +24,8 @@ void RrStateManagerSrv::set_state(const std::shared_ptr<T>& request,
 }
 
 // gps setter/getter
+
+// provide service for setting, and/or retrieve battery state
 void RrStateManagerSrv::set_batt_state(
     const std::shared_ptr<rr_interfaces::srv::BatteryState::Request> request,
     std::shared_ptr<rr_interfaces::srv::BatteryState::Response> response)
@@ -32,19 +36,29 @@ void RrStateManagerSrv::set_batt_state(
     buffer_response_.batt_state                  = request->batt_state_tx;
   };
 
-  auto cb2 = [this](std::shared_ptr<rr_interfaces::srv::BatteryState::Response>& response) {
-    response->batt_state_rx = buffer_response_.batt_state;
-  };
-  set_state<rr_interfaces::srv::BatteryState::Request, rr_interfaces::srv::BatteryState::Response>(request, response, cb1, cb2, request->override_state);
+  auto cb2 = [this](std::shared_ptr<rr_interfaces::srv::BatteryState::Response>& response)
+  { response->batt_state_rx = buffer_response_.batt_state; };
+
+  set_state<rr_interfaces::srv::BatteryState::Request, rr_interfaces::srv::BatteryState::Response>(
+      request, response, cb1, cb2, request->override_state);
 }
 
+// provide service for setting, and/or retrieve gps
 void RrStateManagerSrv::set_gps(const std::shared_ptr<rr_interfaces::srv::Gps::Request> request,
                                 std::shared_ptr<rr_interfaces::srv::Gps::Response> response)
 {
-  std::unique_lock<std::shared_mutex> lock(mutex_);
-  buffer_response_.feature_sets.has_gps = true;
-  buffer_response_.gps                  = request->gps_tx;
-  response->gps_rx                      = buffer_response_.gps;
+
+   auto cb1 = [this](const std::shared_ptr<rr_interfaces::srv::Gps::Request>& request)
+  {
+    buffer_response_.feature_sets.has_gps = true;
+    buffer_response_.gps                  = request->gps_tx;
+  };
+
+  auto cb2 = [this](std::shared_ptr<rr_interfaces::srv::Gps::Response>& response)
+  { response->gps_rx = buffer_response_.gps; };
+  
+  set_state<rr_interfaces::srv::Gps::Request, rr_interfaces::srv::Gps::Response>(
+      request, response, cb1, cb2, request->override_state);
 }
 
 // void RrStateManagerSrv::set_joystick(
