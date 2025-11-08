@@ -1,9 +1,11 @@
 #ifndef STATE_MANAGER_HPP
 #define STATE_MANAGER_HPP
 
-#include <memory>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <functional>
+#include <memory>
+
 #include "rclcpp/rclcpp.hpp"
 #include "rr_common_base/rr_constants.hpp"
 #include "rr_common_base/rr_state_mng_constants.hpp"
@@ -35,6 +37,14 @@ class RrStateManagerSrv : public rclcpp::Node
   // public interfaces beneath
 
   /**
+   * @fn set_batt_state
+   * @brief
+   * sets battery state
+   */
+  void set_batt_state(const std::shared_ptr<rr_interfaces::srv::BatteryState::Request> request,
+                      std::shared_ptr<rr_interfaces::srv::BatteryState::Response> response);
+
+  /**
    * @fn set_gps
    * @brief
    * sets GPS state within the state manager.
@@ -49,14 +59,6 @@ class RrStateManagerSrv : public rclcpp::Node
   //  */
   // void set_joystick(const std::shared_ptr<rr_interfaces::srv::Joy::Request> request,
   //                   std::shared_ptr<rr_interfaces::srv::Joy::Response> response);
-
-  // /**
-  //  * @fn set_batt_state
-  //  * @brief
-  //  * sets battery state
-  //  */
-  // void set_batt_state(const std::shared_ptr<rr_interfaces::srv::BatteryState::Request> request,
-  //                     std::shared_ptr<rr_interfaces::srv::BatteryState::Response> response);
 
   // /**
   //  * @fn set_image
@@ -91,6 +93,12 @@ class RrStateManagerSrv : public rclcpp::Node
   long msg_snt_ = 0;
   void init();
   void init_services();
+
+  template <typename T, typename R>
+  void set_state(const std::shared_ptr<T>& request, std::shared_ptr<R>& response,
+                 const std::function<void(const std::shared_ptr<T>&)>& cb1,
+                 const std::function<void(std::shared_ptr<R>&)>& cb2, const bool override_state);
+
   const std::array<std::string, 3> RANGES_LINKS_ = {rr_constants::LINK_ULTRA_SONIC_CENTER,
                                                     rr_constants::LINK_ULTRA_SONIC_LEFT,
                                                     rr_constants::LINK_ULTRA_SONIC_RIGHT};

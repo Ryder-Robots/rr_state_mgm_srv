@@ -5,7 +5,39 @@ using namespace rr_state_manager;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
+template <typename T, typename R>
+void RrStateManagerSrv::set_state(const std::shared_ptr<T>& request,
+                                  std::shared_ptr<R>& response,
+                                  const std::function<void(const std::shared_ptr<T>&)>& cb1,
+                                  const std::function<void(std::shared_ptr<R>&)>& cb2,
+                                  const bool override_state)
+{
+  if (override_state)
+  {
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    cb1(request);
+  }
+  std::shared_lock<std::shared_mutex> lock(mutex_);
+  cb2(response);
+}
+
 // gps setter/getter
+void RrStateManagerSrv::set_batt_state(
+    const std::shared_ptr<rr_interfaces::srv::BatteryState::Request> request,
+    std::shared_ptr<rr_interfaces::srv::BatteryState::Response> response)
+{
+  auto cb1 = [this](const std::shared_ptr<rr_interfaces::srv::BatteryState::Request>& request)
+  {
+    buffer_response_.feature_sets.has_batt_state = true;
+    buffer_response_.batt_state                  = request->batt_state_tx;
+  };
+
+  auto cb2 = [this](std::shared_ptr<rr_interfaces::srv::BatteryState::Response>& response) {
+    response->batt_state_rx = buffer_response_.batt_state;
+  };
+  set_state<rr_interfaces::srv::BatteryState::Request, rr_interfaces::srv::BatteryState::Response>(request, response, cb1, cb2, request->override_state);
+}
+
 void RrStateManagerSrv::set_gps(const std::shared_ptr<rr_interfaces::srv::Gps::Request> request,
                                 std::shared_ptr<rr_interfaces::srv::Gps::Response> response)
 {
@@ -23,16 +55,6 @@ void RrStateManagerSrv::set_gps(const std::shared_ptr<rr_interfaces::srv::Gps::R
 //   buffer_response_.feature_sets.has_joy = true;
 //   buffer_response_.joystick             = request->joystick;
 //   response->buffer_response             = buffer_response_;
-// }
-
-// void RrStateManagerSrv::set_batt_state(
-//     const std::shared_ptr<rr_interfaces::srv::StateBattReq::Request> request,
-//     std::shared_ptr<rr_interfaces::srv::StateBattReq::Response> response)
-// {
-//   std::unique_lock<std::shared_mutex> lock(mutex_);
-//   buffer_response_.feature_sets.has_batt_state = true;
-//   buffer_response_.batt_state                  = request->batt_state;
-//   response->buffer_response                    = buffer_response_;
 // }
 
 // void RrStateManagerSrv::set_image(
