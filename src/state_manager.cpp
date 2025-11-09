@@ -7,6 +7,7 @@ using std::placeholders::_2;
 
 /*
  * At this stage this can be overriden, but the policy could be set up to use parameters.
+* Potentially this could be derived from the frame rate.
  */
 rclcpp::QoS RrStateManagerSrv::configure_qos()
 {
