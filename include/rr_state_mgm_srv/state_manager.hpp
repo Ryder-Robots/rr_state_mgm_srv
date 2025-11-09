@@ -5,10 +5,12 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <functional>
 #include <memory>
+#include <chrono>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rr_common_base/rr_constants.hpp"
 #include "rr_common_base/rr_state_mng_constants.hpp"
+#include "rr_interfaces/msg/buffer_response.hpp"
 #include "rr_state_mgm_srv/rr_battery_state_service.hpp"
 #include "rr_state_mgm_srv/rr_gps_service.hpp"
 #include "rr_state_mgm_srv/rr_image_service.hpp"
@@ -16,7 +18,6 @@
 #include "rr_state_mgm_srv/rr_joystick_service.hpp"
 #include "rr_state_mgm_srv/rr_navigation_service.hpp"
 #include "rr_state_mgm_srv/rr_range_service.hpp"
-#include "rr_interfaces/msg/buffer_response.hpp"
 #include "state_validator.hpp"
 
 namespace rr_state_manager
@@ -46,9 +47,30 @@ class RrStateManagerSrv : public rclcpp::Node
   rclcpp::Service<rr_interfaces::srv::Navigation>::SharedPtr state_nav_req_;
   rclcpp::Service<rr_interfaces::srv::Range>::SharedPtr state_range_req_;
 
+ protected:
+  /**
+   * @fn configure_qos
+   * @brief defines the quality of service
+   * 
+   * QOS can be overridden, but does not have to be. This could be modified to use
+   * parameters at a later date, but for now it remains something tha can be
+   * overloaded, but hopefully sensible.
+   */
+  virtual rclcpp::QoS configure_qos();
+
  private:
   void init();
   void init_services();
+
+  // service and publisher groups
+  rclcpp::CallbackGroup::SharedPtr batt_state_group_;
+  rclcpp::CallbackGroup::SharedPtr gps_state_group_;
+  rclcpp::CallbackGroup::SharedPtr img_state_group_;
+  rclcpp::CallbackGroup::SharedPtr imu_state_group_;
+  rclcpp::CallbackGroup::SharedPtr joy_state_group_;
+  rclcpp::CallbackGroup::SharedPtr nav_state_group_;
+  rclcpp::CallbackGroup::SharedPtr range_state_group_;
+  rclcpp::CallbackGroup::SharedPtr publish_group_;
 
   // publishes state to topic for consumption.
   void publish_callback();
@@ -62,9 +84,9 @@ class RrStateManagerSrv : public rclcpp::Node
   // current state frame.
   std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame_ =
       std::make_shared<rr_interfaces::msg::BufferResponse>();
- 
-  // controls the topic publisher. 
-  long msg_snt_ = 0; // controls sequence number for each published frame.     
+
+  // controls the topic publisher.
+  long msg_snt_ = 0;  // controls sequence number for each published frame.
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<rr_interfaces::msg::BufferResponse>::SharedPtr publisher_;
 };
