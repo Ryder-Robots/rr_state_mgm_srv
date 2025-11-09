@@ -75,5 +75,19 @@ void RrStateManagerSrv::init()
  */
 void RrStateManagerSrv::publish_callback()
 {
+    boost::uuids::random_generator generator;
+    boost::uuids::uuid b_uuid = generator();
+    unique_identifier_msgs::msg::UUID guid;
+    std::copy(b_uuid.begin(), b_uuid.end(), guid.uuid.begin());
 
+    // set the header.
+    state_frame_->header.frame_id = rr_constants::LINK_STATE;
+    state_frame_->header.stamp = this->now();
+
+    // set trace and sequence variables.
+    state_frame_->guid = guid;
+    state_frame_->seq = ++msg_snt_;
+
+    RCLCPP_DEBUG(logger_, "publishing message for frame: %ld", msg_snt_);
+    this->publisher_->publish(*state_frame_);
 }
