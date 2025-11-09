@@ -18,6 +18,7 @@ add_library(${PROJECT_NAME}_lib
   src/rr_image_service.cpp
   src/rr_imu_service.cpp
   src/rr_joystick_service.cpp
+  src/rr_navigation_service.cpp
   src/state_manager.cpp
   src/state_validator.cpp
 )
