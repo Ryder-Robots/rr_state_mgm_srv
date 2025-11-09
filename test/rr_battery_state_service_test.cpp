@@ -22,8 +22,7 @@ class TestController : public testing::Test
   void SetUp() override
   {
     rclcpp::init(0, nullptr);
-    object_under_test_ = std::make_shared<RrBatteryStateService>();
-    object_under_test_->init(mutex_, state_);
+    object_under_test_ = std::make_shared<RrBatteryStateService>(mutex_, state_);
   }
 
   void TearDown() override { rclcpp::shutdown(); }

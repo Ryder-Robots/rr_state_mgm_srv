@@ -15,8 +15,8 @@ void RrStateManagerSrv::init_services()
   RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_BAT_REQ.c_str());
   state_batt_state_svr_ = this->create_service<rr_interfaces::srv::BatteryState>(
       rr_constants_state_mgr::STATE_BAT_REQ,
-      std::bind(&RrBatteryStateService::set_batt_state, std::make_shared<RrBatteryStateService>(),
-                _1, _2));
+      std::bind(&RrBatteryStateService::set_batt_state,
+                std::make_shared<RrBatteryStateService>(mutex_, state_frame_), _1, _2));
 
   RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_GPS_REQ.c_str());
   state_gps_svr_ = this->create_service<rr_interfaces::srv::Gps>(
