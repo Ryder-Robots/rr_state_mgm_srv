@@ -9,7 +9,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rr_common_base/rr_constants.hpp"
 #include "rr_common_base/rr_state_mng_constants.hpp"
-
 #include "rr_state_mgm_srv/rr_battery_state_service.hpp"
 #include "rr_state_mgm_srv/rr_gps_service.hpp"
 #include "rr_state_mgm_srv/rr_image_service.hpp"
@@ -17,7 +16,7 @@
 #include "rr_state_mgm_srv/rr_joystick_service.hpp"
 #include "rr_state_mgm_srv/rr_navigation_service.hpp"
 #include "rr_state_mgm_srv/rr_range_service.hpp"
-
+#include "rr_interfaces/msg/buffer_response.hpp"
 #include "state_validator.hpp"
 
 namespace rr_state_manager
@@ -48,9 +47,11 @@ class RrStateManagerSrv : public rclcpp::Node
   rclcpp::Service<rr_interfaces::srv::Range>::SharedPtr state_range_req_;
 
  private:
-  long msg_snt_ = 0;
   void init();
   void init_services();
+
+  // publishes state to topic for consumption.
+  void publish_callback();
 
   rclcpp::Logger logger_ = rclcpp::get_logger("state_maintainer");
   rr_state_validator::RrStateValidator validator_;
@@ -61,6 +62,11 @@ class RrStateManagerSrv : public rclcpp::Node
   // current state frame.
   std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame_ =
       std::make_shared<rr_interfaces::msg::BufferResponse>();
+ 
+  // controls the topic publisher. 
+  long msg_snt_ = 0; // controls sequence number for each published frame.     
+  rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Publisher<rr_interfaces::msg::BufferResponse>::SharedPtr publisher_;
 };
 
 }  // namespace rr_state_manager

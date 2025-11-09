@@ -62,4 +62,18 @@ void RrStateManagerSrv::init()
   state_frame_->ranges.resize(0);
 
   init_services();
+
+  // publish 3 times per second
+  this->declare_parameter<int>("frame_rate", 1000/3);
+  int frame_rate = this->get_parameter("frame_rate").as_int();
+  RCLCPP_INFO(logger_, "creating state_manager - publishing service, publish rate is %d", frame_rate);
+  publisher_ = this->create_publisher<rr_interfaces::msg::BufferResponse>(rr_constants::TOPIC_STATE_FRAME, frame_rate);
+}
+
+/*
+ * When called publishes messages to topic for later consumption by higher level services.
+ */
+void RrStateManagerSrv::publish_callback()
+{
+
 }
