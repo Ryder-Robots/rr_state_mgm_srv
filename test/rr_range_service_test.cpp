@@ -20,12 +20,15 @@ class TestController : public testing::Test
   void SetUp() override
   {
     rclcpp::init(0, nullptr);
-    range_svr_ = std::make_shared<RrRangeService>();
+    range_svr_ = std::make_shared<RrRangeService>(mutex_, state_);
   }
 
   void TearDown() override { rclcpp::shutdown(); }
 
   std::shared_ptr<rr_state_manager::RrRangeService> range_svr_;
+  std::shared_ptr<std::shared_mutex> mutex_ = std::make_shared<std::shared_mutex>();
+  std::shared_ptr<rr_interfaces::msg::BufferResponse> state_ =
+      std::make_shared<rr_interfaces::msg::BufferResponse>();
 };
 
 TEST_F(TestController, range)

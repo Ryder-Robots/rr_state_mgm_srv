@@ -26,22 +26,22 @@ void RrStateManagerSrv::init_services()
   RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_IMU_REQ.c_str());
   state_imu_svr_ = this->create_service<rr_interfaces::srv::Imu>(
       rr_constants_state_mgr::STATE_IMU_REQ,
-      std::bind(&RrImuService::set_imu, std::make_shared<RrImuService>(), _1, _2));
+      std::bind(&RrImuService::set_imu, std::make_shared<RrImuService>(mutex_, state_frame_), _1, _2));
 
   RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_JOY_REQ.c_str());
   state_joy_req_ = this->create_service<rr_interfaces::srv::Joy>(
       rr_constants_state_mgr::STATE_JOY_REQ,
-      std::bind(&RrJoystrickService::set_joystick, std::make_shared<RrJoystrickService>(), _1, _2));
+      std::bind(&RrJoystrickService::set_joystick, std::make_shared<RrJoystrickService>(mutex_, state_frame_), _1, _2));
 
   RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_NAV_REQ.c_str());
   state_nav_req_ = this->create_service<rr_interfaces::srv::Navigation>(
       rr_constants_state_mgr::STATE_NAV_REQ,
-      std::bind(&RrNavigationService::set_nav, std::make_shared<RrNavigationService>(), _1, _2));
+      std::bind(&RrNavigationService::set_nav, std::make_shared<RrNavigationService>(mutex_, state_frame_), _1, _2));
 
   RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_RNG_REQ.c_str());
   state_range_req_ = this->create_service<rr_interfaces::srv::Range>(
       rr_constants_state_mgr::STATE_RNG_REQ,
-      std::bind(&RrRangeService::set_range, std::make_shared<RrRangeService>(), _1, _2));
+      std::bind(&RrRangeService::set_range, std::make_shared<RrRangeService>(mutex_, state_frame_), _1, _2));
 }
 
 /*

@@ -9,6 +9,14 @@ namespace rr_state_manager
 class RrNavigationService : public RrStateServiceBase
 {
  public:
+  RrNavigationService(std::shared_ptr<std::shared_mutex> mutex,
+                      std::shared_ptr<rr_interfaces::msg::BufferResponse> state)
+  {
+    init(mutex, state);
+  }
+
+  ~RrNavigationService() = default;
+
   void set_nav(const std::shared_ptr<rr_interfaces::srv::Navigation::Request> request,
                std::shared_ptr<rr_interfaces::srv::Navigation::Response> response);
 };

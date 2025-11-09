@@ -9,6 +9,14 @@ namespace rr_state_manager
 class RrJoystrickService : public RrStateServiceBase
 {
  public:
+  RrJoystrickService(std::shared_ptr<std::shared_mutex> mutex,
+                     std::shared_ptr<rr_interfaces::msg::BufferResponse> state)
+  {
+    init(mutex, state);
+  }
+
+  ~RrJoystrickService() = default;
+
   void set_joystick(const std::shared_ptr<rr_interfaces::srv::Joy::Request> request,
                     std::shared_ptr<rr_interfaces::srv::Joy::Response> response);
 };

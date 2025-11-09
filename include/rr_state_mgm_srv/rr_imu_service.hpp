@@ -10,6 +10,13 @@ namespace rr_state_manager
 class RrImuService : public RrStateServiceBase
 {
  public:
+  RrImuService(std::shared_ptr<std::shared_mutex> mutex,
+               std::shared_ptr<rr_interfaces::msg::BufferResponse> state)
+  {
+    init(mutex, state);
+  }
+  ~RrImuService() = default;
+
   void set_imu(const std::shared_ptr<rr_interfaces::srv::Imu::Request> request,
                std::shared_ptr<rr_interfaces::srv::Imu::Response> response);
 };

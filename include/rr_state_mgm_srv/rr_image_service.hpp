@@ -11,6 +11,14 @@ namespace rr_state_manager
 class RrImageService : public RrStateServiceBase
 {
 
+  RrImageService(std::shared_ptr<std::shared_mutex> mutex,
+                std::shared_ptr<rr_interfaces::msg::BufferResponse> state)
+  {
+    init(mutex, state);
+  }
+
+  ~RrImageService() = default;
+
   /**
    * @fn set_gps
    * @brief callback function for sending/recieving Image objects
