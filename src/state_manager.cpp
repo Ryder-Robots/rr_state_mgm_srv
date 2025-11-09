@@ -21,7 +21,7 @@ void RrStateManagerSrv::init_services()
   RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_GPS_REQ.c_str());
   state_gps_svr_ = this->create_service<rr_interfaces::srv::Gps>(
       rr_constants_state_mgr::STATE_GPS_REQ,
-      std::bind(&RrrGpsService::set_gps, std::make_shared<RrrGpsService>(), _1, _2));
+      std::bind(&RrrGpsService::set_gps, std::make_shared<RrrGpsService>(mutex_, state_frame_), _1, _2));
 
   RCLCPP_INFO(logger_, "creating state_manager::%s", rr_constants_state_mgr::STATE_IMU_REQ.c_str());
   state_imu_svr_ = this->create_service<rr_interfaces::srv::Imu>(
