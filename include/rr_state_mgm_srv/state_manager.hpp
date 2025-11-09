@@ -9,14 +9,15 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rr_common_base/rr_constants.hpp"
 #include "rr_common_base/rr_state_mng_constants.hpp"
-#include "rr_interfaces/srv/battery_state.hpp"
-#include "rr_interfaces/srv/gps.hpp"
-#include "rr_interfaces/srv/image.hpp"
-#include "rr_interfaces/srv/imu.hpp"
-#include "rr_interfaces/srv/joy.hpp"
-#include "rr_interfaces/srv/navigation.hpp"
-#include "rr_interfaces/srv/range.hpp"
-#include "rr_interfaces/srv/state_response.hpp"
+
+#include "rr_state_mgm_srv/rr_battery_state_service.hpp"
+#include "rr_state_mgm_srv/rr_gps_service.hpp"
+#include "rr_state_mgm_srv/rr_image_service.hpp"
+#include "rr_state_mgm_srv/rr_imu_service.hpp"
+#include "rr_state_mgm_srv/rr_joystick_service.hpp"
+#include "rr_state_mgm_srv/rr_navigation_service.hpp"
+#include "rr_state_mgm_srv/rr_range_service.hpp"
+
 #include "state_validator.hpp"
 
 namespace rr_state_manager
@@ -26,87 +27,40 @@ namespace rr_state_manager
  * @class RrStateManagerSrv
  * @brief state management services
  *
- * Creates a state frame for robot, using several frames. The intended use is that subscribers will
- * push the current frame to this service, and it will keep it up to date.
+ * Creates a state frame for robot, using several frames. Each state frame is published to the
+ * state topic. lower level nodes will communicate with the various services this node initlizes.
+ *
+ * Each state frame based upon a timer for consumption of mid level, and higher level services.
  */
 class RrStateManagerSrv : public rclcpp::Node
 {
  public:
   RrStateManagerSrv() : Node("rr_state_manager") { init(); }
-
-  // public interfaces beneath
-
-  /**
-   * @fn set_batt_state
-   * @brief
-   * sets battery state
-   */
-  void set_batt_state(const std::shared_ptr<rr_interfaces::srv::BatteryState::Request> request,
-                      std::shared_ptr<rr_interfaces::srv::BatteryState::Response> response);
-
-  /**
-   * @fn set_gps
-   * @brief
-   * sets GPS state within the state manager.
-   */
-  void set_gps(const std::shared_ptr<rr_interfaces::srv::Gps::Request> request,
-               std::shared_ptr<rr_interfaces::srv::Gps::Response> response);
-
-  // /**
-  //  * @fn set_gps
-  //  * @brief
-  //  * sets Joystick state within the state manager.
-  //  */
-  // void set_joystick(const std::shared_ptr<rr_interfaces::srv::Joy::Request> request,
-  //                   std::shared_ptr<rr_interfaces::srv::Joy::Response> response);
-
-  // /**
-  //  * @fn set_image
-  //  * @brief
-  //  * sets current image frame in state manager.
-  //  */
-  // void set_image(const std::shared_ptr<rr_interfaces::srv::Image::Request> request,
-  //                std::shared_ptr<rr_interfaces::srv::Image::Response> response);
-
-  // void set_imu(const std::shared_ptr<rr_interfaces::srv::Imu::Request> request,
-  //              std::shared_ptr<rr_interfaces::srv::Imu::Response> response);
-
-  // void set_range(const std::shared_ptr<rr_interfaces::srv::StateRange::Request> request,
-  //                std::shared_ptr<rr_interfaces::srv::StateRange::Response> response);
-
-  // /**
-  //  * @fn get_state
-  //  * @brief returns current state
-  //  */
-  // void get_state(const std::shared_ptr<rr_interfaces::srv::State::Request> request,
-  //                std::shared_ptr<rr_interfaces::srv::State::Response> response);
-
   ~RrStateManagerSrv() = default;
 
   // state variables
-  rclcpp::Service<rr_interfaces::srv::Gps>::SharedPtr state_gps_req_;
+  rclcpp::Service<rr_interfaces::srv::BatteryState>::SharedPtr state_batt_state_svr_;
+  rclcpp::Service<rr_interfaces::srv::Gps>::SharedPtr state_gps_svr_;
+  rclcpp::Service<rr_interfaces::srv::Image>::SharedPtr state_img_svr_;
+  rclcpp::Service<rr_interfaces::srv::Imu>::SharedPtr state_imu_svr_;
   rclcpp::Service<rr_interfaces::srv::Joy>::SharedPtr state_joy_req_;
-  rclcpp::Service<rr_interfaces::srv::BatteryState>::SharedPtr state_bat_req_;
-  rclcpp::Service<rr_interfaces::srv::Image>::SharedPtr state_img_req_;
+  rclcpp::Service<rr_interfaces::srv::Navigation>::SharedPtr state_nav_req_;
+  rclcpp::Service<rr_interfaces::srv::Range>::SharedPtr state_range_req_;
 
  private:
   long msg_snt_ = 0;
   void init();
   void init_services();
 
-  template <typename T, typename R>
-  void set_state(const std::shared_ptr<T>& request, std::shared_ptr<R>& response,
-                 const std::function<void(const std::shared_ptr<T>&)>& cb1,
-                 const std::function<void(std::shared_ptr<R>&)>& cb2, const bool override_state);
-
-  const std::array<std::string, 3> RANGES_LINKS_ = {rr_constants::LINK_ULTRA_SONIC_CENTER,
-                                                    rr_constants::LINK_ULTRA_SONIC_LEFT,
-                                                    rr_constants::LINK_ULTRA_SONIC_RIGHT};
-
   rclcpp::Logger logger_ = rclcpp::get_logger("state_maintainer");
-  std::shared_mutex mutex_;
-  rr_interfaces::msg::BufferResponse buffer_response_;
   rr_state_validator::RrStateValidator validator_;
+
+  // controls threads for state writing, and reading.
+  std::shared_ptr<std::shared_mutex> mutex_ = std::make_shared<std::shared_mutex>();
+
+  // current state frame.
+  std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame_ =
+      std::make_shared<rr_interfaces::msg::BufferResponse>();
 };
 
 }  // namespace rr_state_manager
