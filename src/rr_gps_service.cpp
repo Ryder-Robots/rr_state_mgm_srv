@@ -15,10 +15,3 @@ void RrrGpsService::set_gps(const std::shared_ptr<rr_interfaces::srv::Gps::Reque
   std::shared_lock<std::shared_mutex> lock(*mutex_);
   response->gps_rx = buffer_response_->gps;
 }
-
-void RrrGpsService::init(std::shared_ptr<std::shared_mutex> mutex,
-                         std::shared_ptr<rr_interfaces::msg::BufferResponse> buffer_response)
-{
-  mutex_           = mutex;
-  buffer_response_ = buffer_response;
-}

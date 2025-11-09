@@ -15,10 +15,3 @@ void RrImageService::set_image(const std::shared_ptr<rr_interfaces::srv::Image::
   std::shared_lock<std::shared_mutex> lock(*mutex_);
   response->img_rx = buffer_response_->img;
 }
-
-void RrImageService::init(std::shared_ptr<std::shared_mutex> mutex,
-                          std::shared_ptr<rr_interfaces::msg::BufferResponse> buffer_response)
-{
-  mutex_           = mutex;
-  buffer_response_ = buffer_response;
-}
