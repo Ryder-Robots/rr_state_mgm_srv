@@ -62,6 +62,7 @@ class RrStateManagerSrv : public rclcpp::Node
   void init();
   void init_services();
 
+  // TODO: these should be moved to there corresponding nodes, to loosen up the coupling.
   // service and publisher groups
   rclcpp::CallbackGroup::SharedPtr batt_state_group_;
   rclcpp::CallbackGroup::SharedPtr gps_state_group_;
