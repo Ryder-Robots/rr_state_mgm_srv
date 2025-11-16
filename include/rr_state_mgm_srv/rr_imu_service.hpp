@@ -7,6 +7,9 @@
 namespace rr_state_manager
 {
 
+/** 
+ * @deprecated 
+ */
 class RrImuService : public RrStateServiceBase
 {
  public:

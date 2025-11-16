@@ -6,6 +6,9 @@
 
 namespace rr_state_manager
 {
+/**
+ *  @deprecated
+ */  
 class RrImageService : public RrStateServiceBase
 {
  public:

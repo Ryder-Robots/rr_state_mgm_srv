@@ -6,6 +6,9 @@
 
 namespace rr_state_manager
 {
+/**
+ * @deprecated
+ */  
 class RrBatteryStateService : public RrStateServiceBase
 {
  public:

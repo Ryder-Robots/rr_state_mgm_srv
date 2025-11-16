@@ -9,6 +9,10 @@
 
 namespace rr_state_manager
 {
+
+/**
+ * @deprecated
+ */  
 class RrRangeService : public RrStateServiceBase
 {
  public:

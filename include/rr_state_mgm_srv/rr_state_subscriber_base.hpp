@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "rclcpp.hpp"
+#include "rclcpp/rclcpp.hpp"
 #include "rr_interfaces/msg/buffer_response.hpp"
 
 namespace rr_state_manager
@@ -49,6 +49,13 @@ class RrStateSubscriberBase : public rclcpp::Node
    */
   void init(std::shared_ptr<std::shared_mutex> mutex,
             std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame);
+
+  
+  /**
+   * @fn configure_qos
+   * @brief configures profile for node, hopefully defaults are sensible, but it can be overridden.
+   */
+  virtual rclcpp::QoS configure_qos();
 
   /**
    * @fn get_topic

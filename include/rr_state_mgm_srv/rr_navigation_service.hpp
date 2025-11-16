@@ -6,6 +6,10 @@
 
 namespace rr_state_manager
 {
+
+/**
+ *  @deprecated
+ */  
 class RrNavigationService : public RrStateServiceBase
 {
  public:

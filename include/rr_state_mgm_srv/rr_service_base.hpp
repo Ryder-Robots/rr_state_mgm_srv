@@ -10,6 +10,7 @@ namespace rr_state_manager
 {
 
 /**
+ * @deprecated
  * @class RrStateServiceBase
  *
  * @brief base class for state manager services.

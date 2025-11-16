@@ -7,6 +7,7 @@
 namespace rr_state_manager
 {
 /**
+ * @deprecated
  * @class RrrGpsService
  * @brief triggered when GPS is read or written to state maintainer
  */
