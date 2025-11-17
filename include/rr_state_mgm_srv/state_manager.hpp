@@ -38,6 +38,9 @@ class RrStateManagerSrv : public rclcpp::Node
   RrStateManagerSrv() : Node("rr_state_manager") { init(); }
   ~RrStateManagerSrv() = default;
 
+  const std::shared_ptr<std::shared_mutex> get_mutex(){return mutex_;}
+  const std::shared_ptr<rr_interfaces::msg::BufferResponse> get_state_frame() {return state_frame_;}
+
   // state variables
   rclcpp::Service<rr_interfaces::srv::BatteryState>::SharedPtr state_batt_state_svr_;
   rclcpp::Service<rr_interfaces::srv::Gps>::SharedPtr state_gps_svr_;
