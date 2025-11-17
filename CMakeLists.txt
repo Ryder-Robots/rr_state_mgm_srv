@@ -16,6 +16,7 @@ add_library(${PROJECT_NAME}_lib STATIC
   src/rr_service_base.cpp
   src/rr_battery_state_subscriber.cpp
   src/rr_battery_state_service.cpp
+  src/rr_gps_subscriber.cpp
   src/rr_gps_service.cpp
   src/rr_image_service.cpp
   src/rr_imu_service.cpp

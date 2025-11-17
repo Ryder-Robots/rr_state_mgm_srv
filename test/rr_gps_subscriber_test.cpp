@@ -1,4 +1,4 @@
-#include "rr_state_mgm_srv/rr_gps_service.hpp"
+#include "rr_state_mgm_srv/rr_gps_subscriber.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -16,18 +16,18 @@ class TestController : public testing::Test
 
   ~TestController() override
   {
-    // You can do clean-up work that doesn't throw exceptions here.
   }
 
   void SetUp() override
   {
     rclcpp::init(0, nullptr);
-    obj_under_test_ = std::make_shared<RrrGpsService>(mutex_, state_);
+    obj_under_test_ = std::make_shared<RrGpsSubscriber>();
+    obj_under_test_->init(mutex_, state_);
   }
 
   void TearDown() override { rclcpp::shutdown(); }
 
-  std::shared_ptr<rr_state_manager::RrrGpsService> obj_under_test_;
+  std::shared_ptr<rr_state_manager::RrGpsSubscriber> obj_under_test_;
   std::shared_ptr<std::shared_mutex> mutex_ = std::make_shared<std::shared_mutex>();
   std::shared_ptr<rr_interfaces::msg::BufferResponse> state_ =
       std::make_shared<rr_interfaces::msg::BufferResponse>();
@@ -54,17 +54,8 @@ TEST_F(TestController, gps)
   std::fill(std::begin(expected.position_covariance), std::end(expected.position_covariance), 0.0);
   expected.position_covariance_type = sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
 
-  rr_interfaces::srv::Gps::Request request;
-  rr_interfaces::srv::Gps::Response response;
-  request.gps_tx         = expected;
-  request.override_state = true;
-  std::shared_ptr<rr_interfaces::srv::Gps::Request> req_sh =
-      std::make_shared<rr_interfaces::srv::Gps::Request>(request);
-  std::shared_ptr<rr_interfaces::srv::Gps::Response> res_sh =
-      std::make_shared<rr_interfaces::srv::Gps::Response>(response);
-
-    obj_under_test_->set_gps(req_sh, res_sh);
-    sensor_msgs::msg::NavSatFix actual = res_sh->gps_rx;
+    obj_under_test_->callback(expected);
+    sensor_msgs::msg::NavSatFix actual = state_->gps;
 
     EXPECT_EQ(actual.header.stamp, current_time);
     EXPECT_EQ(actual.header.frame_id, rr_constants::LINK_GPS);
