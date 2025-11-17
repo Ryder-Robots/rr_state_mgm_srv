@@ -1,4 +1,4 @@
-#include "rr_state_mgm_srv/rr_battery_state_service.hpp"
+#include "rr_state_mgm_srv/rr_battery_state_subscriber.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -22,12 +22,13 @@ class TestController : public testing::Test
   void SetUp() override
   {
     rclcpp::init(0, nullptr);
-    object_under_test_ = std::make_shared<RrBatteryStateService>(mutex_, state_);
+    object_under_test_ = std::make_shared<RrBatteryStateSubscriber>();
+    object_under_test_->init(mutex_, state_);
   }
 
   void TearDown() override { rclcpp::shutdown(); }
 
-  std::shared_ptr<RrBatteryStateService> object_under_test_;
+  std::shared_ptr<RrBatteryStateSubscriber> object_under_test_;
   std::shared_ptr<std::shared_mutex> mutex_ = std::make_shared<std::shared_mutex>();
   std::shared_ptr<rr_interfaces::msg::BufferResponse> state_ =
       std::make_shared<rr_interfaces::msg::BufferResponse>();
@@ -63,20 +64,9 @@ TEST_F(TestController, battery_state_set)
   battery_state.serial_number       = "FOOSERIAL1111";
   battery_state.present = true;
 
-  rr_interfaces::srv::BatteryState::Request request;
-  rr_interfaces::srv::BatteryState::Response response;
+  object_under_test_->callback(battery_state);
 
-  request.batt_state_tx  = battery_state;
-  request.override_state = true;
-
-  std::shared_ptr<rr_interfaces::srv::BatteryState::Request> req_sh =
-      std::make_shared<rr_interfaces::srv::BatteryState::Request>(request);
-  std::shared_ptr<rr_interfaces::srv::BatteryState::Response> res_sh =
-      std::make_shared<rr_interfaces::srv::BatteryState::Response>(response);
-
-  object_under_test_->set_batt_state(req_sh, res_sh);
-  sensor_msgs::msg::BatteryState res = res_sh->batt_state_rx;
-
+  sensor_msgs::msg::BatteryState res = state_->batt_state;
   EXPECT_EQ(res.header.frame_id, rr_constants::LINK_BATT_STATE);
   EXPECT_EQ(res.header.stamp, current_time);
   EXPECT_EQ(res.voltage, battery_state.voltage);

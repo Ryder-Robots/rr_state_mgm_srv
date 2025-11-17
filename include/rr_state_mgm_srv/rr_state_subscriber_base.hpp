@@ -22,6 +22,7 @@
 #define RR_STATE_SUBSCRIBER_BASE_HPP
 
 #include "rclcpp/rclcpp.hpp"
+#include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rr_interfaces/msg/buffer_response.hpp"
 
@@ -50,13 +51,58 @@ class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
   /**
    * @fn configure_qos
    * @brief configures profile for node, hopefully defaults are sensible, but it can be overridden.
+   *
+   * At this stage this can be overriden, but the policy could be set up to use parameters.
+   * Potentially this could be derived from the frame rate.
    */
-  virtual rclcpp::QoS configure_qos();
+  virtual rclcpp::QoS configure_qos()
+  {
+    RCLCPP_INFO(this->get_logger(), "configuring QoS policy");
+    rclcpp::QoS qos_profile(1);
+    builtin_interfaces::msg::Duration lifespan_duration;
+    lifespan_duration.sec     = 0;
+    lifespan_duration.nanosec = 330 * 1000000;
+    qos_profile.lifespan(lifespan_duration);
+    return qos_profile;
+  }
 
-  void callback_around(const T message);
+  /**
+   * @fn callback_around
+   * @brief callback_around wraps around the callback function
+   *
+   * controls locking, and statistics.
+   */
+  void callback_around(const typename T::SharedPtr message)
+  {
+    msg_recieved_++;
+    std::unique_lock<std::shared_mutex> lock(*mutex_);
+    try
+    {
+      callback(*message);
+      msg_success_++;
+    }
+    catch (const std::exception& e)
+    {
+      RCLCPP_ERROR(this->get_logger(), "could not send packet: %s", e.what());
+      msg_dropped_++;
+    }
+    catch (...)
+    {
+      RCLCPP_ERROR(this->get_logger(), "could not send packet: unknown reason");
+      msg_dropped_++;
+    }
+  }
 
+  /**
+   * CAVEAT: there is no guarantee when on_configure will be called, so this method must be called
+   * in its own routine, and on_configure cannot rely on anything delievered in this configuration.
+   */
   void init(std::shared_ptr<std::shared_mutex> mutex,
-            std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame);
+            std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame)
+  {
+    mutex_       = mutex;
+    state_frame_ = state_frame;
+  }
 
   /**
    * @fn on_configure
@@ -65,7 +111,22 @@ class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
    * Create base subscriber, this will be used for all subscriber nodes.
    */
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
-      const rclcpp_lifecycle::State& state) override;
+      const rclcpp_lifecycle::State& previous_state) override
+  {
+    if (previous_state.id() != lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED)
+    {
+      RCLCPP_WARN(this->get_logger(), "Invalid transition to configure from state %s",
+                  previous_state.label().c_str());
+      return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
+    }
+
+    RCLCPP_INFO(this->get_logger(), "creating subscriber: %s", this->get_name());
+    auto cb_binding = [this](const typename T::SharedPtr msg) { this->callback_around(msg); };
+
+    this->create_subscription<typename T::SharedPtr>(get_topic(), configure_qos(), cb_binding);
+
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+  }
 
   /**
    *  @fn get_topic
@@ -93,7 +154,6 @@ class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
   long msg_recieved_ = 0;  // frames that have been recieved
   long msg_success_  = 0;  // successfully updated frame
   long msg_dropped_  = 0;  // frames that have been dropped
-  rclcpp::CallbackGroup::SharedPtr node_cb_group_;
 };
 }  // namespace rr_state_manager
 

@@ -9,8 +9,8 @@ ament_add_gmock(${PROJECT_NAME}_state_maintainer_test
     rr_state_maintainer_test.cpp
 )
 
-ament_add_gmock(${PROJECT_NAME}_rr_battery_state_service_test
-    rr_battery_state_service_test.cpp
+ament_add_gmock(${PROJECT_NAME}_rr_battery_state_subscriber_test
+    rr_battery_state_subscriber_test.cpp
 )
 
 ament_add_gmock(${PROJECT_NAME}_rr_gps_service_test
@@ -22,6 +22,6 @@ ament_add_gmock(${PROJECT_NAME}_rr_range_service_test
 )
 
 target_link_libraries(${PROJECT_NAME}_state_maintainer_test  ${PROJECT_NAME}_lib)
-target_link_libraries(${PROJECT_NAME}_rr_battery_state_service_test  ${PROJECT_NAME}_lib)
+target_link_libraries(${PROJECT_NAME}_rr_battery_state_subscriber_test  ${PROJECT_NAME}_lib)
 target_link_libraries(${PROJECT_NAME}_rr_gps_service_test  ${PROJECT_NAME}_lib)
 target_link_libraries(${PROJECT_NAME}_rr_range_service_test  ${PROJECT_NAME}_lib)

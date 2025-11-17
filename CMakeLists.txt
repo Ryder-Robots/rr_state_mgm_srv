@@ -12,7 +12,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(rr_common_base REQUIRED)
 
-add_library(${PROJECT_NAME}_lib
+add_library(${PROJECT_NAME}_lib STATIC
   src/rr_state_subscriber_base.cpp
   src/rr_service_base.cpp
   src/rr_battery_state_subscriber.cpp
