@@ -38,7 +38,11 @@ class RrBatteryStateSubscriber : public RrStateSubscriberBase<sensor_msgs::msg::
 
   const std::string get_topic() override { return rr_constants::TOPIC_BATT_STATE; }
 
-  void some_method();
+  /**
+   * @fn callback
+   * @brief update state
+   */
+  void callback(const sensor_msgs::msg::BatteryState msg) override;
 };
 
 // class RrBatteryStateSubscriber : public

@@ -23,14 +23,7 @@
 
 using namespace rr_state_manager;
 
-void RrBatteryStateSubscriber::some_method() {}
-
-// /**
-//  * add the battery state event to the state frame.
-//  */
-// void RrBatteryStateSubscriber::callback(const sensor_msgs::msg::BatteryState::SharedPtr ptr)
-// {
-//   sensor_msgs::msg::BatteryState message    = *ptr;
-//   state_frame_->feature_sets.has_batt_state = true;
-//   state_frame_->batt_state                  = message;
-// }
+void RrBatteryStateSubscriber::callback(const sensor_msgs::msg::BatteryState msg) {
+  state_frame_->feature_sets.has_batt_state = true;
+  state_frame_->batt_state                  = msg;
+}
