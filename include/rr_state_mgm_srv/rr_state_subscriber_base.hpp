@@ -1,5 +1,3 @@
-
-
 // Copyright (c) 2025 Ryder Robots
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -22,6 +22,10 @@
 
 using namespace rr_state_manager;
 
+/**
+ * CAVEAT: there is no guarantee when on_configure will be called, so this method must be called in its own
+ * routine, and on_configure cannot rely on anything delievered in this configuration.
+ */
 template <typename T>
 void RrStateSubscriberBase<T>::init(std::shared_ptr<std::shared_mutex> mutex,
                                     std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame)

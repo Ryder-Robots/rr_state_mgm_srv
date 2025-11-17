@@ -44,26 +44,6 @@ class RrBatteryStateSubscriber : public RrStateSubscriberBase<sensor_msgs::msg::
    */
   void callback(const sensor_msgs::msg::BatteryState msg) override;
 };
-
-// class RrBatteryStateSubscriber : public
-// RrStateSubscriberBase<sensor_msgs::msg::BatteryState::SharedPtr>
-// {
-//  public:
-//   RrBatteryStateSubscriber() : RrStateSubscriberBase("rr_battery_state_subscriber") {}
-//   ~RrBatteryStateSubscriber() = default;
-
-//   /**
-//    * @fn get_topic
-//    * @brief direct reference to the constant topic.
-//    */
-//   std::string get_topic() override { return rr_constants::TOPIC_BATT_STATE; }
-
-//   /**
-//    * @fn callback
-//    * @brief called on battery state event.
-//    */
-//   void callback(const sensor_msgs::msg::BatteryState::SharedPtr message) override;
-// };
 }  // namespace rr_state_manager
 
 #endif  // RR_BATTERY_STATE_SUBSCRIBER_HPP
