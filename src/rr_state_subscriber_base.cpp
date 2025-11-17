@@ -22,6 +22,14 @@
 
 using namespace rr_state_manager;
 
+template <typename T>
+void RrStateSubscriberBase<T>::init(std::shared_ptr<std::shared_mutex> mutex,
+                                    std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame)
+{
+  mutex_       = mutex;
+  state_frame_ = state_frame;
+}
+
 /*
  * At this stage this can be overriden, but the policy could be set up to use parameters.
  * Potentially this could be derived from the frame rate.
@@ -76,4 +84,3 @@ void RrStateSubscriberBase<T>::callback_around(T message)
     msg_dropped_++;
   }
 }
-

@@ -1,5 +1,4 @@
-#ifndef RR_STATE_SUBSCRIBER_BASE_HPP
-#define RR_STATE_SUBSCRIBER_BASE_HPP
+
 
 // Copyright (c) 2025 Ryder Robots
 //
@@ -20,6 +19,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
+#ifndef RR_STATE_SUBSCRIBER_BASE_HPP
+#define RR_STATE_SUBSCRIBER_BASE_HPP
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
@@ -55,6 +57,9 @@ class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
 
   void callback_around(const T message);
 
+  void init(std::shared_ptr<std::shared_mutex> mutex,
+            std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame);
+
   /**
    * @fn on_configure
    * @brief override lifecycle on_configure method
@@ -67,7 +72,7 @@ class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
   /**
    *  @fn get_topic
    *  @brief return topic string.
-   */    
+   */
   virtual const std::string get_topic() = 0;
 
   /**
