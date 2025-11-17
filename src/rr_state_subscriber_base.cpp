@@ -1,5 +1,3 @@
-#include "rr_state_mgm_srv/rr_state_subscriber_base.hpp"
-
 // Copyright (c) 2025 Ryder Robots
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,12 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "rr_state_mgm_srv/rr_state_subscriber_base.hpp"
+
 using namespace rr_state_manager;
 
-/*
- * At this stage this can be overriden, but the policy could be set up to use parameters.
- * Potentially this could be derived from the frame rate.
- */
 template <typename T>
 rclcpp::QoS RrStateSubscriberBase<T>::configure_qos()
 {
@@ -39,23 +35,57 @@ rclcpp::QoS RrStateSubscriberBase<T>::configure_qos()
 }
 
 template <typename T>
-void RrStateSubscriberBase<T>::init(std::shared_ptr<std::shared_mutex> mutex,
-                                    std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame)
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+RrStateSubscriberBase<T>::on_configure(const rclcpp_lifecycle::State& state)
 {
-  state_frame_       = state_frame;
-  mutex_             = mutex;
-  rclcpp::QoS policy = configure_qos();
+  RCLCPP_INFO(this->get_logger(), "creating subscriber: %s", this->get_name());
 
-  RCLCPP_INFO(this->get_logger(), "creating subscriber");
-  node_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
-  subscription_  = this->create_subscription<typename T::MsgType>(
-      get_topic(), policy, get_callback_binding(), rmw_qos_profile_default, node_cb_group_);
+  std::function<void(const typename T::SharedPtr)> cb_binding =
+      [this](const typename T::SharedPtr msg) { this->callback_around(msg); };
+  auto node_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+  subscription_       = this->create_subscription<typename T::SharedPtr>(
+      get_topic(), configure_qos(), cb_binding, rmw_qos_profile_default, node_cb_group_);
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
-template <typename T>
-void RrStateSubscriberBase<T>::callback_around(const typename T::UniquePtr message)
-{
-  RCLCPP_DEBUG(this->get_logger(), "creating subscriber");
-  std::unique_lock<std::shared_mutex> lock(*mutex_);
-  callback(*message);
-}
+// /*
+//  * At this stage this can be overriden, but the policy could be set up to use parameters.
+//  * Potentially this could be derived from the frame rate.
+//  */
+
+// /**
+//  * creates a subscription service.
+//  */
+// template <typename T>
+// void RrStateSubscriberBase<T>::init(std::shared_ptr<std::shared_mutex> mutex,
+//                                     std::shared_ptr<rr_interfaces::msg::BufferResponse>
+//                                     state_frame)
+// {
+//   state_frame_       = state_frame;
+//   mutex_             = mutex;
+//   rclcpp::QoS policy = configure_qos();
+
+//   std::function<void(const typename T::SharedPtr)> cb_binding =
+//       [this](const typename T::SharedPtr msg)
+//   {
+//     this->callback_around(msg);
+//   };
+
+//   RCLCPP_INFO(this->get_logger(), "creating subscriber");
+//   node_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+//   subscription_  = this->create_subscription<typename T::SharedPtr>(
+//       get_topic(), policy, cb_binding, rmw_qos_profile_default, node_cb_group_);
+// }
+
+// /**
+//  * called as the callback, note that this will reference the callback function, which the
+//  sub-class
+//  * MUST implement.
+//  */
+// template <typename T>
+// void RrStateSubscriberBase<T>::callback_around(T message)
+// {
+//   RCLCPP_DEBUG(this->get_logger(), "creating subscriber");
+//   std::unique_lock<std::shared_mutex> lock(*mutex_);
+//   callback(*message);
+// }

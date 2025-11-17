@@ -9,11 +9,13 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rr_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(rr_common_base REQUIRED)
 
 add_library(${PROJECT_NAME}_lib
   src/rr_state_subscriber_base.cpp
   src/rr_service_base.cpp
+  src/rr_battery_state_subscriber.cpp
   src/rr_battery_state_service.cpp
   src/rr_gps_service.cpp
   src/rr_image_service.cpp
@@ -25,7 +27,7 @@ add_library(${PROJECT_NAME}_lib
   src/state_validator.cpp
 )
 
-ament_target_dependencies(${PROJECT_NAME}_lib rclcpp rr_interfaces "rr_common_base")
+ament_target_dependencies(${PROJECT_NAME}_lib rclcpp rclcpp rclcpp_lifecycle rr_interfaces "rr_common_base")
 
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

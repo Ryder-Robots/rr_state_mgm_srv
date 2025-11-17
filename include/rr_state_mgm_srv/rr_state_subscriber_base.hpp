@@ -22,6 +22,7 @@
 // SOFTWARE.
 
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rr_interfaces/msg/buffer_response.hpp"
 
 namespace rr_state_manager
@@ -38,55 +39,100 @@ namespace rr_state_manager
  * Provided in locking mechanics, for a common base method.
  */
 template <typename T>
-class RrStateSubscriberBase : public rclcpp::Node
+class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
 {
  public:
-  /**
-   * @fn init
-   * @brief initlizes the service
-   * @param mutex to use
-   * @param buffer_response global state object
-   */
-  void init(std::shared_ptr<std::shared_mutex> mutex,
-            std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame);
+  explicit RrStateSubscriberBase(const std::string& node_name)
+      : rclcpp_lifecycle::LifecycleNode(node_name)
+  {
+  }
 
-  
   /**
    * @fn configure_qos
    * @brief configures profile for node, hopefully defaults are sensible, but it can be overridden.
    */
   virtual rclcpp::QoS configure_qos();
 
-  /**
-   * @fn get_topic
-   * @brief topic for the callback.
-   */
-  virtual std::string get_topic() = 0;
+  void callback_around(const T message);
 
   /**
-   * @fn get_callback_binding
-   * @brief returns the callback binding to be used for this node.
+   * @fn on_configure
+   * @brief override lifecycle on_configure method
+   *
+   * Create base subscriber, this will be used for all subscriber nodes.
    */
-  virtual std::function<void(const typename T::SharedPtr)> get_callback_binding() = 0;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(
+      const rclcpp_lifecycle::State& state) override;
 
-  void callback_around(const typename T::UniquePtr message);
+  virtual const std::string get_topic() = 0;
 
-  virtual void callback(const T message) = 0;
-
- protected:
-  // shared mutex for reading and writing from state maintater interface.
-  std::shared_ptr<std::shared_mutex> mutex_;
-
-  // state maintainer object. This will be set by the node, during initlization time.
-  std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame_;
-
-  // controls the topic publisher.
-  long msg_snt_     = 0;  // frames that have been recieved
-  long msg_dropped_ = 0;  // frames that have been dropped
-  rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::CallbackGroup::SharedPtr node_cb_group_;
-  typename rclcpp::Subscription<typename T::MsgType>::SharedPtr subscription_;
+ private:
+  typename rclcpp::Subscription<T>::SharedPtr subscription_;
 };
+// template <typename T>
+// class RrStateSubscriberBase : public rclcpp::Node
+// {
+//  public:
+//   /**
+//    * @fn RrStateSubscriberBase
+//    * @brief class constructor, node name is the sub class node.
+//    */
+//   explicit RrStateSubscriberBase(const std::string& node_name) : rclcpp::Node(node_name) {}
+
+//   /**
+//    * @fn  ~RrStateSubscriberBase
+//    * @brief class deconstructor.
+//    */
+//   ~RrStateSubscriberBase() = default;
+
+//   /**
+//    * @fn init
+//    * @brief initlizes the service
+//    * @param mutex to use
+//    * @param buffer_response global state object
+//    */
+//   void init(std::shared_ptr<std::shared_mutex> mutex,
+//             std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame);
+
+//   /**
+//    * @fn configure_qos
+//    * @brief configures profile for node, hopefully defaults are sensible, but it can be
+//    overridden.
+//    */
+//   virtual rclcpp::QoS configure_qos();
+
+//   /**
+//    * @fn get_topic
+//    * @brief topic for the callback.
+//    */
+//   virtual std::string get_topic() = 0;
+
+//   /**
+//    * @fn callback_around
+//    * @brief called as part of the callback and adds thread safety.
+//    */
+//   void callback_around(const T message);
+
+//   /**
+//    * @fn callback
+//    * @brief implemented by sub-class that act on the event.
+//    */
+//   virtual void callback(const T message) = 0;
+
+//  protected:
+//   // shared mutex for reading and writing from state maintater interface.
+//   std::shared_ptr<std::shared_mutex> mutex_;
+
+//   // state maintainer object. This will be set by the node, during initlization time.
+//   std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame_;
+
+//   // controls the topic publisher.
+//   long msg_snt_     = 0;  // frames that have been recieved
+//   long msg_dropped_ = 0;  // frames that have been dropped
+//   rclcpp::TimerBase::SharedPtr timer_;
+//   rclcpp::CallbackGroup::SharedPtr node_cb_group_;
+//   typename rclcpp::Subscription<T> subscription_;
+// };
 }  // namespace rr_state_manager
 
 #endif  // RR_STATE_SUBSCRIBER_BASE_HPP
