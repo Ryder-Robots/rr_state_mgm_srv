@@ -18,16 +18,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "rr_state_mgm_srv/rr_battery_state_subscriber.hpp"
+#ifndef RR_JOYSTICK_SUBSCRIBER_HPP
+#define RR_JOYSTICK_SUBSCRIBER_HPP
 
-using namespace rr_state_manager;
+#include "rr_common_base/rr_sensor_constants.hpp"
+#include "rr_state_mgm_srv/rr_state_subscriber_base.hpp"
+#include "sensor_msgs/msg/joy.hpp"
 
-void RrJoystickSubscriber::init() {
-  
-}
+// this can go into the base
+// using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
-void RrJoystickSubscriber::callback(sensor_msgs::msg::Joy msg)
+namespace rr_state_manager
 {
-  state_frame_->feature_sets.has_batt_state = true;
-  state_frame_->batt_state                  = msg;
-}
+
+/**
+ * @class RrJoystickSubscriber
+ * @brief updates state for joystick events.
+ */
+class RrJoystickSubscriber : public RrStateSubscriberBase
+{
+ public:
+  explicit RrJoystickSubscriber(std::shared_ptr<std::shared_mutex> mutex,
+                                std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame)
+      : RrStateSubscriberBase("rr_joystick_state_node", mutex, state_frame)
+  {
+    init();
+  }
+
+ protected:
+  void init();
+
+ private:
+  void callback(sensor_msgs::msg::Joy msg);
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscription_;
+};
+}  // namespace rr_state_manager
+
+#endif  // RR_JOYSTICK_SUBSCRIBER_HPP

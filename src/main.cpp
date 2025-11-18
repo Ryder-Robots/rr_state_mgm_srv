@@ -19,9 +19,10 @@
 // SOFTWARE.
 
 #include "rclcpp/rclcpp.hpp"
-#include "rr_state_mgm_srv/rr_battery_state_subscriber.hpp"
-#include "rr_state_mgm_srv/rr_gps_subscriber.hpp"
-#include "rr_state_mgm_srv/state_manager.hpp"
+// #include "rr_state_mgm_srv/rr_battery_state_subscriber.hpp"
+// #include "rr_state_mgm_srv/rr_gps_subscriber.hpp"
+#include "rr_state_mgm_srv/rr_joystick_subscriber.hpp"
+// #include "rr_state_mgm_srv/state_manager.hpp"
 
 using namespace rr_state_manager;
 
@@ -32,18 +33,26 @@ using namespace rr_state_manager;
 int main(int argc, char* argv[])
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<RrStateManagerSrv>();
+
   rclcpp::executors::MultiThreadedExecutor executor;
-  executor.add_node(node);
+  // executor.add_node(node);
 
+  // auto node = std::make_shared<RrStateManagerSrv>();
   // add subscriber nodes
-  auto batt_state_sub = std::make_shared<RrBatteryStateSubscriber>();
-  batt_state_sub->init(node->get_mutex(), node->get_state_frame());
-  executor.add_node(batt_state_sub->get_node_base_interface());
+  // auto batt_state_sub = std::make_shared<RrBatteryStateSubscriber>();
+  // batt_state_sub->init(node->get_mutex(), node->get_state_frame());
+  // executor.add_node(batt_state_sub->get_node_base_interface());
 
-  auto gps_state_sub = std::make_shared<RrGpsSubscriber>();
-  gps_state_sub->init(node->get_mutex(), node->get_state_frame());
-  executor.add_node(gps_state_sub->get_node_base_interface());
+  // auto gps_state_sub = std::make_shared<RrGpsSubscriber>();
+  // gps_state_sub->init(node->get_mutex(), node->get_state_frame());
+  // executor.add_node(gps_state_sub->get_node_base_interface());
+
+  std::shared_ptr<std::shared_mutex> mutex = std::make_shared<std::shared_mutex>();
+  std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame =
+      std::make_shared<rr_interfaces::msg::BufferResponse>();
+
+  auto joy_state_sub = std::make_shared<RrJoystickSubscriber>(mutex, state_frame);
+  executor.add_node(joy_state_sub);
 
   executor.spin();
   rclcpp::shutdown();

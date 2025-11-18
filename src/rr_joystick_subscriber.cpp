@@ -18,16 +18,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "rr_state_mgm_srv/rr_battery_state_subscriber.hpp"
+#include "rr_state_mgm_srv/rr_joystick_subscriber.hpp"
 
 using namespace rr_state_manager;
 
-void RrJoystickSubscriber::init() {
-  
+void RrJoystickSubscriber::init()
+{
+  RCLCPP_INFO(this->get_logger(), "creating subscriptions");
+  rclcpp::SubscriptionOptions options;
+  auto topic_callback = std::bind(&RrJoystickSubscriber::callback, this, std::placeholders::_1);
+  subscription_       = this->create_subscription<sensor_msgs::msg::Joy>(
+      rr_constants::TOPIC_JOY, rclcpp::SensorDataQoS(), topic_callback, options);
 }
 
 void RrJoystickSubscriber::callback(sensor_msgs::msg::Joy msg)
 {
-  state_frame_->feature_sets.has_batt_state = true;
-  state_frame_->batt_state                  = msg;
+  std::unique_lock<std::shared_mutex> lock(*mutex_);
+  RCLCPP_DEBUG(this->get_logger(), "setting joystick state");
+  state_frame_->feature_sets.has_joy = true;
+  state_frame_->joystick             = msg;
 }
