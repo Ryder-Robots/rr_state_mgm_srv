@@ -20,10 +20,7 @@ namespace rr_state_manager
  * @class RrStateManagerSrv
  * @brief state management services
  *
- * Creates a state frame for robot, using several frames. Each state frame is published to the
- * state topic. lower level nodes will communicate with the various services this node initlizes.
- *
- * Each state frame based upon a timer for consumption of mid level, and higher level services.
+ * Sends telementry of current state back to listening services.
  */
 class RrStateManagerSrv : public RrStateSubscriberBase
 {
