@@ -6,5 +6,8 @@ When activate nodes without lifecycle manager the following command must be ran 
 that needs to be ran.
 
 ```bash
-ros2 lifecycle set /node_name activate
+ros2 lifecycle set /rr_state_manager configure
+ros2 lifecycle set /rr_state_manager deactivate
+ros2 lifecycle set /rr_state_manager cleanup
+ros2 lifecycle set /rr_state_manager shutdown
 ```
