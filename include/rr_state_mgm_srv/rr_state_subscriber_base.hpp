@@ -85,6 +85,7 @@ class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
 
   // state maintainer object. This will be set by the node, during initlization time.
   std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame_;
+
 };
 }  // namespace rr_state_manager
 

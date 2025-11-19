@@ -1,13 +1,14 @@
 #include "rr_state_mgm_srv/state_manager.hpp"
 
 using namespace rr_state_manager;
+using namespace rclcpp_lifecycle::node_interfaces;
 
 using std::placeholders::_1;
 using std::placeholders::_2;
 
 /*
  * At this stage this can be overriden, but the policy could be set up to use parameters.
-* Potentially this could be derived from the frame rate.
+ * Potentially this could be derived from the frame rate.
  */
 rclcpp::QoS RrStateManagerSrv::configure_qos()
 {
@@ -36,18 +37,11 @@ void RrStateManagerSrv::init()
 
   // set range to 3. this is hard limit for now.
   state_frame_->ranges.resize(0);
-
-  // publish 3 times per second
-  this->declare_parameter<int64_t>("frame_rate", 1000 / 3);
-  int64_t frame_rate = this->get_parameter("frame_rate").as_int();
-  RCLCPP_INFO(this->get_logger(), "creating state_manager - publishing service, publish rate is %ld",
-              frame_rate);
+  RCLCPP_INFO(this->get_logger(),
+              "creating state_manager - publishing service, publish rate is %ld", frame_rate_);
   publisher_ = this->create_publisher<rr_interfaces::msg::BufferResponse>(
-      rr_constants::TOPIC_STATE_FRAME, frame_rate);
-  auto timer_callback = std::bind(&RrStateManagerSrv::publish_callback, this);
-  publish_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant); 
-  auto ticks = std::chrono::duration<int, std::milli>(frame_rate);
-  timer_ = this->create_wall_timer(ticks, timer_callback, publish_group_);
+      rr_constants::TOPIC_STATE_FRAME, frame_rate_);
+  publish_group_      = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
 }
 
 /*
@@ -73,6 +67,28 @@ void RrStateManagerSrv::publish_callback()
 }
 
 // no pre-checks are getting performed at this stage.
-bool RrStateManagerSrv::pre_check() {
-    return true;
+bool RrStateManagerSrv::pre_check()
+{
+  return true;
+}
+
+// activate the publisher. and create the timer
+Ros2Lc_CallbackReturn RrStateManagerSrv::on_activate(const rclcpp_lifecycle::State& pre_state)
+{
+    // publish 3 times per second
+  this->declare_parameter<int64_t>("frame_rate", 1000 / 3);
+  frame_rate_ = this->get_parameter("frame_rate").as_int();
+  auto ticks = std::chrono::duration<int, std::milli>(frame_rate_);
+  auto timer_callback = std::bind(&RrStateManagerSrv::publish_callback, this);
+  timer_     = this->create_wall_timer(ticks, timer_callback, publish_group_);
+
+  return Ros2Lc_CallbackReturn::SUCCESS;
+}
+
+// destroy timer explicitly.
+Ros2Lc_CallbackReturn RrStateManagerSrv::on_deactivate(const rclcpp_lifecycle::State& pre_state)
+{
+  
+  timer_.reset();
+  return Ros2Lc_CallbackReturn::SUCCESS;
 }

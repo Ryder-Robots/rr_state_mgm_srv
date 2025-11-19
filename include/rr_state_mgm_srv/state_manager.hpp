@@ -55,14 +55,23 @@ class RrStateManagerSrv : public RrStateSubscriberBase
   bool pre_check() override;
   void init() override;
 
+  // activate the publisher. and create the timer
+  CallbackReturn on_activate(const rclcpp_lifecycle::State&) override;
+
+  // destroy timer explicitly.
+  CallbackReturn on_deactivate(const rclcpp_lifecycle::State&) override;
+
   // publishes state to topic for consumption.
   void publish_callback();
 
  private:
   rclcpp::CallbackGroup::SharedPtr publish_group_;
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<rr_interfaces::msg::BufferResponse>::SharedPtr publisher_;
+  rclcpp_lifecycle::LifecyclePublisher<rr_interfaces::msg::BufferResponse>::SharedPtr publisher_;
   long msg_snt_ = 0;
+  
+  // default frame rate.
+  int64_t frame_rate_ = 1000 / 3;
 };
 
 }  // namespace rr_state_manager

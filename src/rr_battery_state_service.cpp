@@ -17,3 +17,6 @@ void RrBatteryStateService::set_batt_state(
   std::shared_lock<std::shared_mutex> lock(*mutex_);
   response->batt_state_rx = buffer_response_->batt_state;
 }
+
+
+
