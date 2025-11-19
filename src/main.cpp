@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
       std::make_shared<rr_interfaces::msg::BufferResponse>();
 
   auto joy_state_sub = std::make_shared<RrJoystickSubscriber>(mutex, state_frame);
-  executor.add_node(joy_state_sub);
+  executor.add_node(joy_state_sub->get_node_base_interface());
 
   executor.spin();
   rclcpp::shutdown();

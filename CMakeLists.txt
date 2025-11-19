@@ -26,6 +26,7 @@ find_package(rr_common_base REQUIRED)
   # src/state_manager.cpp
   # src/state_validator.cpp
 add_library(${PROJECT_NAME}_lib STATIC
+  src/rr_state_subscriber_base.cpp
   src/rr_joystick_subscriber.cpp
 )
 

@@ -25,8 +25,6 @@
 #include "rr_state_mgm_srv/rr_state_subscriber_base.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 
-// this can go into the base
-// using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
 namespace rr_state_manager
 {
@@ -42,11 +40,12 @@ class RrJoystickSubscriber : public RrStateSubscriberBase
                                 std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame)
       : RrStateSubscriberBase("rr_joystick_state_node", mutex, state_frame)
   {
-    init();
+    
   }
 
  protected:
-  void init();
+  bool pre_check() override;
+  void init() override;
 
  private:
   void callback(sensor_msgs::msg::Joy msg);

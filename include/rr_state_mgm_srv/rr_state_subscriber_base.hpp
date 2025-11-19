@@ -22,8 +22,17 @@
 #define RR_STATE_SUBSCRIBER_BASE_HPP
 
 #include <memory>
+
+#include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rr_interfaces/msg/buffer_response.hpp"
+
+// definitions are defined here, because ROS2 recommends avoiding mangled nodes (see
+// http://design.ros2.org/articles/node_lifecycle.html) so therefore standard C++ aliases can not be
+// used, but the want to avoid excessive typing is true.
+#define Ros2Lc_CallbackReturn \
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 
 namespace rr_state_manager
 {
@@ -39,18 +48,37 @@ namespace rr_state_manager
  * Provided in locking mechanics, for a common base method.
  */
 
-class RrStateSubscriberBase : public rclcpp::Node
+class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
 {
  public:
   explicit RrStateSubscriberBase(const std::string& node_name,
                                  std::shared_ptr<std::shared_mutex> mutex,
                                  std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame)
-      : Node(node_name), mutex_(mutex), state_frame_(state_frame)
+      : rclcpp_lifecycle::LifecycleNode(node_name,
+                                        rclcpp::NodeOptions().use_intra_process_comms(true)),
+        mutex_(mutex),
+        state_frame_(state_frame)
   {
   }
 
  protected:
+  /**
+   * @fn pre_check
+   * @brief perform pre checks, such as what services are needed before starting.
+   */
+  virtual bool pre_check() = 0;
 
+  /**
+   * @fn init()
+   * @brief perform any configuration that is needed by the sub class.
+   */
+  virtual void init() = 0;
+
+  /**
+   * @fn on_configure
+   * @brief perform inilization. This should configure the node before any work can be done.
+   */
+  Ros2Lc_CallbackReturn on_configure(const rclcpp_lifecycle::State&) override;
 
   // shared mutex for reading and writing from state maintater interface.
   std::shared_ptr<std::shared_mutex> mutex_;

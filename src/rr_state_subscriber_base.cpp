@@ -18,36 +18,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "rr_state_mgm_srv/rr_joystick_subscriber.hpp"
+#include "rr_state_mgm_srv/rr_state_subscriber_base.hpp"
 
 using namespace rr_state_manager;
 
-/*
- * perform initlization.
- */
-void RrJoystickSubscriber::init()
+Ros2Lc_CallbackReturn RrStateSubscriberBase::on_configure(
+    const rclcpp_lifecycle::State& previous_state)
 {
-  RCLCPP_INFO(this->get_logger(), "creating subscriptions");
-  rclcpp::SubscriptionOptions options;
-  auto topic_callback = std::bind(&RrJoystickSubscriber::callback, this, std::placeholders::_1);
-  subscription_       = this->create_subscription<sensor_msgs::msg::Joy>(
-      rr_constants::TOPIC_JOY, rclcpp::SensorDataQoS(), topic_callback, options);
-}
+  if (previous_state.id() != lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED)
+  {
+    RCLCPP_WARN(get_logger(), "on_configure called from unexpected state: %s",
+                previous_state.label().c_str());
+    return Ros2Lc_CallbackReturn::FAILURE;
+  }
 
-/**
- * make sure this locked before doing anything.
- */
-void RrJoystickSubscriber::callback(sensor_msgs::msg::Joy msg)
-{
-  std::unique_lock<std::shared_mutex> lock(*mutex_);
-  RCLCPP_DEBUG(this->get_logger(), "setting joystick state");
-  state_frame_->feature_sets.has_joy = true;
-  state_frame_->joystick             = msg;
-}
-
-/**
- * no pre-checking implemented, may want to check to see if UDP service is up and running.
- */
-bool RrJoystickSubscriber::pre_check() {
-  return true;
+  Ros2Lc_CallbackReturn status = Ros2Lc_CallbackReturn::SUCCESS;
+  try
+  {
+    if (!pre_check()) {
+        RCLCPP_ERROR(this->get_logger(), "precheck for %s has failed.", this->get_name());
+        status = Ros2Lc_CallbackReturn::FAILURE;
+    }
+    init();
+  }
+  catch (const std::exception& e)
+  {
+    RCLCPP_FATAL(this->get_logger(), "unable to configure node: %s, recieved error: %s",
+                 this->get_name(), e.what());
+    status = Ros2Lc_CallbackReturn::ERROR;
+  }
+  catch (...)
+  {
+    RCLCPP_FATAL(this->get_logger(), "unable to configure node: %s, due to unknown error condition",
+                 this->get_name());
+    status = Ros2Lc_CallbackReturn::ERROR;
+  }
+  return status;
 }
