@@ -21,10 +21,10 @@
 #include "rclcpp/rclcpp.hpp"
 // #include "rr_state_mgm_srv/rr_battery_state_subscriber.hpp"
 // #include "rr_state_mgm_srv/rr_gps_subscriber.hpp"
-#include "rr_state_mgm_srv/rr_joystick_subscriber.hpp"
+// #include "rr_state_mgm_srv/rr_joystick_subscriber.hpp"
 #include "rr_state_mgm_srv/state_manager.hpp"
 
-using namespace rr_state_manager;
+using namespace rr_state_manager::rr_state_manager_node;
 
 /*
  * using multithreaded node to allow different nodes to use the service at once,
@@ -37,13 +37,13 @@ int main(int argc, char* argv[])
   rclcpp::executors::MultiThreadedExecutor executor;
 
   std::shared_ptr<std::shared_mutex> mutex = std::make_shared<std::shared_mutex>();
-  std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame =
-      std::make_shared<rr_interfaces::msg::BufferResponse>();
+  std::shared_ptr<rr_interfaces::msg::StateFrame> state_frame =
+      std::make_shared<rr_interfaces::msg::StateFrame>();
 
-  auto joy_state_sub = std::make_shared<RrJoystickSubscriber>(mutex, state_frame);
-  executor.add_node(joy_state_sub->get_node_base_interface());
-
-  auto state_pub = std::make_shared<RrStateManagerSrv>(mutex, state_frame);
+  // auto joy_state_sub = std::make_shared<RrJoystickSubscriber>(mutex, state_frame);
+  // executor.add_node(joy_state_sub->get_node_base_interface());
+  rclcpp::NodeOptions opts;
+  auto state_pub = std::make_shared<RrStateManagerSrv>(opts, mutex, state_frame);
   executor.add_node(state_pub->get_node_base_interface());
 
   executor.spin();

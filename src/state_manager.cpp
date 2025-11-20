@@ -1,33 +1,15 @@
 #include "rr_state_mgm_srv/state_manager.hpp"
 
-using namespace rr_state_manager;
-using namespace rclcpp_lifecycle::node_interfaces;
-
-using std::placeholders::_1;
-using std::placeholders::_2;
-
-/*
- * At this stage this can be overriden, but the policy could be set up to use parameters.
- * Potentially this could be derived from the frame rate.
- */
-rclcpp::QoS RrStateManagerSrv::configure_qos()
-{
-  RCLCPP_INFO(this->get_logger(), "configuring QoS policy");
-  rclcpp::QoS qos_profile(1);
-  builtin_interfaces::msg::Duration lifespan_duration;
-  lifespan_duration.sec     = 0;
-  lifespan_duration.nanosec = 330 * 1000000;
-  qos_profile.lifespan(lifespan_duration);
-  return qos_profile;
-}
+using namespace rr_state_manager::rr_state_manager_node;
 
 /*
  * During initalization set all features to 'false' assume that nothing is there until it is set
  * at least once.
  */
-void RrStateManagerSrv::init()
+LNI::CallbackReturn RrStateManagerSrv::on_configure(const lc::State& state)
 {
-  RCLCPP_INFO(this->get_logger(), "creating state_manager - starting with feature list");
+  (void)state;
+  RCLCPP_INFO(this->get_logger(), "configuring state manager service");
   state_frame_->feature_sets.has_batt_state = false;
   state_frame_->feature_sets.has_gps        = false;
   state_frame_->feature_sets.has_img        = false;
@@ -36,18 +18,54 @@ void RrStateManagerSrv::init()
   state_frame_->feature_sets.has_ranges     = false;
 
   // set range to 3. this is hard limit for now.
-  state_frame_->ranges.resize(0);
-  RCLCPP_INFO(this->get_logger(),
-              "creating state_manager - publishing service, publish rate is %ld", frame_rate_);
-  publisher_ = this->create_publisher<rr_interfaces::msg::BufferResponse>(
-      rr_constants::TOPIC_STATE_FRAME, frame_rate_);
-  publish_group_      = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+  state_frame_->ranges.resize(3);
+
+  callback_group_ = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+  return LNI::CallbackReturn::SUCCESS;
 }
 
-/*
- * When called publishes messages to topic for later consumption by higher level services.
- */
-void RrStateManagerSrv::publish_callback()
+// activate the publisher. and create the timer
+LNI::CallbackReturn RrStateManagerSrv::on_activate(const lc::State& state)
+{
+  (void)state;
+  auto callback = std::bind(&RrStateManagerSrv::get_state_frame, this, std::placeholders::_1, std::placeholders::_2);
+  state_service_ = create_service<rr_interfaces::srv::State>("state_manager/get_state_frame", callback, configure_qos(), callback_group_);
+  return LNI::CallbackReturn::SUCCESS;
+}
+
+// destroy timer explicitly.
+LNI::CallbackReturn RrStateManagerSrv::on_deactivate(const lc::State& state)
+{
+  (void)state;
+  return LNI::CallbackReturn::SUCCESS;
+}
+
+LNI::CallbackReturn RrStateManagerSrv::on_cleanup(const lc::State& state)
+{
+  (void)state;
+  state_service_.reset();
+  return LNI::CallbackReturn::SUCCESS;
+}
+
+LNI::CallbackReturn RrStateManagerSrv::on_shutdown(const lc::State& state)
+{
+  (void)state;
+  return LNI::CallbackReturn::SUCCESS;
+}
+
+rclcpp::QoS RrStateManagerSrv::configure_qos()
+{
+  RCLCPP_INFO(get_logger(), "configuring QoS policy");
+  rclcpp::QoS qos_profile(1);
+  builtin_interfaces::msg::Duration lifespan_duration;
+  lifespan_duration.sec     = 0;
+  lifespan_duration.nanosec = 330 * 1000000;
+  qos_profile.lifespan(lifespan_duration);
+  return qos_profile;
+}
+
+void RrStateManagerSrv::get_state_frame(const std::shared_ptr<rr_interfaces::srv::State::Request> req,
+               const std::shared_ptr<rr_interfaces::srv::State::Response> res)
 {
   boost::uuids::random_generator generator;
   boost::uuids::uuid b_uuid = generator();
@@ -60,35 +78,8 @@ void RrStateManagerSrv::publish_callback()
 
   // set trace and sequence variables.
   state_frame_->guid = guid;
+  state_frame_->request_id = req->request_id;
   state_frame_->seq  = ++msg_snt_;
 
-  RCLCPP_DEBUG(this->get_logger(), "publishing message for frame: %ld", msg_snt_);
-  this->publisher_->publish(*state_frame_);
-}
-
-// no pre-checks are getting performed at this stage.
-bool RrStateManagerSrv::pre_check()
-{
-  return true;
-}
-
-// activate the publisher. and create the timer
-Ros2Lc_CallbackReturn RrStateManagerSrv::on_activate(const rclcpp_lifecycle::State& pre_state)
-{
-    // publish 3 times per second
-  this->declare_parameter<int64_t>("frame_rate", 1000 / 3);
-  frame_rate_ = this->get_parameter("frame_rate").as_int();
-  auto ticks = std::chrono::duration<int, std::milli>(frame_rate_);
-  auto timer_callback = std::bind(&RrStateManagerSrv::publish_callback, this);
-  timer_     = this->create_wall_timer(ticks, timer_callback, publish_group_);
-
-  return Ros2Lc_CallbackReturn::SUCCESS;
-}
-
-// destroy timer explicitly.
-Ros2Lc_CallbackReturn RrStateManagerSrv::on_deactivate(const rclcpp_lifecycle::State& pre_state)
-{
-  
-  timer_.reset();
-  return Ros2Lc_CallbackReturn::SUCCESS;
+  res->state_frame = *state_frame_;
 }

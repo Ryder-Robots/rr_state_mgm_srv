@@ -26,7 +26,7 @@
 #include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "rr_interfaces/msg/buffer_response.hpp"
+#include "rr_interfaces/msg/state_frame.hpp"
 
 // definitions are defined here, because ROS2 recommends avoiding mangled nodes (see
 // http://design.ros2.org/articles/node_lifecycle.html) so therefore standard C++ aliases can not be
@@ -53,7 +53,7 @@ class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
  public:
   explicit RrStateSubscriberBase(const std::string& node_name,
                                  std::shared_ptr<std::shared_mutex> mutex,
-                                 std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame)
+                                 std::shared_ptr<rr_interfaces::msg::StateFrame> state_frame)
       : rclcpp_lifecycle::LifecycleNode(node_name,
                                         rclcpp::NodeOptions().use_intra_process_comms(true)),
         mutex_(mutex),
@@ -84,7 +84,7 @@ class RrStateSubscriberBase : public rclcpp_lifecycle::LifecycleNode
   std::shared_ptr<std::shared_mutex> mutex_;
 
   // state maintainer object. This will be set by the node, during initlization time.
-  std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame_;
+  std::shared_ptr<rr_interfaces::msg::StateFrame> state_frame_;
 
 };
 }  // namespace rr_state_manager

@@ -25,10 +25,12 @@ find_package(rr_common_base REQUIRED)
   # src/rr_range_service.cpp
   # 
   # src/state_validator.cpp
+
+  #   src/rr_state_subscriber_base.cpp
+  # src/rr_joystick_subscriber.cpp
 add_library(${PROJECT_NAME}_lib STATIC
   src/state_manager.cpp
-  src/rr_state_subscriber_base.cpp
-  src/rr_joystick_subscriber.cpp
+
 )
 
 ament_target_dependencies(${PROJECT_NAME}_lib rclcpp rclcpp rclcpp_lifecycle rr_interfaces "rr_common_base")
