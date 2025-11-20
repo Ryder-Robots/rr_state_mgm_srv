@@ -37,7 +37,7 @@ class RrJoystickSubscriber : public RrStateSubscriberBase
 {
  public:
   explicit RrJoystickSubscriber(std::shared_ptr<std::shared_mutex> mutex,
-                                std::shared_ptr<rr_interfaces::msg::BufferResponse> state_frame)
+                                std::shared_ptr<rr_interfaces::msg::StateFrame> state_frame)
       : RrStateSubscriberBase("rr_joystick_state_node", mutex, state_frame)
   {
     
