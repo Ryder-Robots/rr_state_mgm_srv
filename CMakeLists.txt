@@ -33,7 +33,12 @@ add_library(${PROJECT_NAME}_lib STATIC
 
 )
 
-ament_target_dependencies(${PROJECT_NAME}_lib rclcpp rclcpp rclcpp_lifecycle rr_interfaces "rr_common_base")
+target_link_libraries(rr_state_mgm_srv_lib PUBLIC
+  ${rr_interfaces_TARGETS}
+  rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
+  rr_common_base::rr_common_base
+)
 
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
