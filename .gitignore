@@ -1,0 +1,45 @@
+# Colcon/CMake build directories
+build/
+install/
+log/
+
+# Build system files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+Makefile
+
+# Executable and object files
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.out
+
+# Debug files
+*.dSYM/
+*.pdb
+
+# ROS2 generated python/service files (if any)
+*.pyc
+__pycache__/
+
+# IDEs and editors
+.vscode/
+*.swp
+*.user
+*.idea/
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+moc_*.h
+
+# Miscellaneous
+*.log
+*.tmp
+*.bak
