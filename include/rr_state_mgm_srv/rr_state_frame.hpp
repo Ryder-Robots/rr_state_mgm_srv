@@ -28,6 +28,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include "rr_interfaces/msg/state_frame.hpp"
 #include "rr_common_base/rr_constants.hpp"
+#include "rr_state_mgm_srv/visibility_control.h"
 
 namespace rrobot
 {

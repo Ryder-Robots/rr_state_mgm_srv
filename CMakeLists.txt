@@ -34,8 +34,8 @@ find_package(rclcpp_components REQUIRED)
 find_package(uuid REQUIRED)
 
 add_library(rr_state_mgm 
-  src/rr_state_mgm.cpp
-  src/rr_state_frame.cpp)
+  src/rr_state_frame.cpp
+  src/rr_state_joy.cpp)
 add_library(rr_state_mgm_srv::rr_state_mgm ALIAS rr_state_mgm)
 target_compile_features(rr_state_mgm PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_include_directories(rr_state_mgm PUBLIC

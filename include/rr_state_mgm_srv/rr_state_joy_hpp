@@ -1,0 +1,91 @@
+// Copyright (c) 2025 Ryder Robots
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#ifndef RR_STATE_JOY_HPP
+#define RR_STATE_JOY_HPP
+
+#include <memory>
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rr_state_mgm_srv/rr_state_frame.hpp"
+#include "rr_state_mgm_srv/visibility_control.h"
+#include "rr_common_base/rr_constants.hpp"
+#include "sensor_msgs/msg/joy.hpp"
+#include <rclcpp_components/register_node_macro.hpp>
+
+namespace rrobot
+{
+    namespace state_frame
+    {
+
+        using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+
+        /**
+         * @class RRStateJoyNode
+         * @brief provides interface for joystick sensor node to input current event frame into state frame.
+         */
+        class RRStateJoyNode : public rclcpp_lifecycle::LifecycleNode
+        {
+          public:
+            explicit RRStateJoyNode(const rclcpp::NodeOptions &options = rclcpp::NodeOptions()) : rclcpp_lifecycle::LifecycleNode("rr_state_joy_node", options) {}
+
+            ~RRStateJoyNode() = default;
+
+            /**
+             * @fn on_configure
+             * @brief performs configuration.
+             * 
+             * Creates subscriber callback
+             */
+            CallbackReturn on_configure(const rclcpp_lifecycle::State &state) override;
+
+            /**
+             * @fn on_activate
+             * @brief activates subscription
+             */
+            CallbackReturn on_activate(const rclcpp_lifecycle::State &state) override;
+
+            /**
+             * @fn on_deactivate
+             * @brief stops subsciber
+             */
+            CallbackReturn on_deactivate(const rclcpp_lifecycle::State &state) override;
+
+            /**
+             * @fn on_cleanup
+             * @brief  resets callback, and subscription
+             */
+            CallbackReturn on_cleanup(const rclcpp_lifecycle::State &state) override;
+
+            /**
+             * @fn update_state
+             * @brief update joystick in state frame
+             * 
+             */
+            void update_state(const sensor_msgs::msg::Joy::UniquePtr msg);
+
+          private:
+            rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscription_;
+            RrStateFrameSingleton &state_frame_ = RrStateFrameSingleton::get_instance();
+        };
+    } // namespace state_frame
+} // namespace rrobot
+
+#endif // RR_STATE_JOY_HPP
