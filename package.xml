@@ -8,12 +8,14 @@
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
+  
 
   <depend>rr_common_base</depend>
   <depend>rr_interfaces</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
   <depend>rclcpp_components</depend>
+  <depend>uuid-dev</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
