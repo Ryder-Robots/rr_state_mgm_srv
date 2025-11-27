@@ -55,6 +55,11 @@ target_link_libraries(
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(rr_state_mgm PRIVATE "RR_STATE_MGM_SRV_BUILDING_LIBRARY")
 
+rclcpp_components_register_node(rr_state_mgm
+  PLUGIN "rrobot::state_frame::RRStateJoyNode"
+  EXECUTABLE "rr_state_joystick_node"
+)
+
 install(
   DIRECTORY include/
   DESTINATION include/${PROJECT_NAME}
