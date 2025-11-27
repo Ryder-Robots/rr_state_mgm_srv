@@ -45,12 +45,12 @@ namespace rrobot
         {
           public:
             /**
-             * @fn getInstance
+             * @fn get_instance
              * @brief returns global instance of RrStateFrameSingleton.
              * 
              * If it has not been access before this will create the instance.
              */
-            static RrStateFrameSingleton &getInstance()
+            static RrStateFrameSingleton &get_instance()
             {
                 static RrStateFrameSingleton instance;
                 return instance;
